@@ -1,0 +1,16 @@
+[env]
+# Where is our C compiler
+CC=C:\mingw\mingw64\bin\gcc.exe
+# Where is our CPP compiler
+CXX=C:\mingw\mingw64\bin\g++.exe
+
+[settings]
+build_type=Debug
+
+os=Windows
+arch=x86_64
+compiler=gcc
+
+# Adjust to the gcc version of your MinGW package
+compiler.version=8.1
+compiler.libcxx=libstdc++11
