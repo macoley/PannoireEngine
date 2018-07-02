@@ -7,11 +7,16 @@
 #include <GLFW/glfw3.h>
 #include <gsl/gsl>
 
-class Render {
-public:
-    Render();
-    void render(std::string text);
-};
+namespace PE::Render {
+
+    class Render {
+    public:
+        Render();
+        void render(std::string text);
+    };
+
+}
+
 
 
 #endif //PANNOIREENGINE_RENDER_H

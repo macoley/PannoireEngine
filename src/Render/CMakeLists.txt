@@ -2,7 +2,7 @@
 set(TARGET pe_render)
 
 set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/Render)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/PE/Render)
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/Render)
 
 set(SRC
         ${INCROOT}/Render.h
