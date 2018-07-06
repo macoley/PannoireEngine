@@ -11,4 +11,5 @@ else()
     message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
 endif()
 
+add_subdirectory(lib)
 add_subdirectory(src)

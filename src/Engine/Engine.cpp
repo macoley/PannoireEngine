@@ -8,4 +8,9 @@ namespace PE::Engine {
         render.render("Render z engina");
     }
 
+    template<typename C, typename... Types>
+    void Engine::assignComponent(Types... args) {
+
+    }
+
 }
