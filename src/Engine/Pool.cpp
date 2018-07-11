@@ -8,12 +8,4 @@ namespace PE::Engine {
         }
     }
 
-    template <typename T>
-    ObjectPool<T>::~ObjectPool() {
-        for(std::size_t i = 0; i < m_size; ++i) {
-            T *object_ptr = static_cast<T>(get(i));
-            object_ptr->~T();
-        }
-    }
-
 }

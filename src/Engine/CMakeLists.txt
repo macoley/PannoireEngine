@@ -7,9 +7,12 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/Engine)
 set(SRC
         ${INCROOT}/Engine.h
         ${SRCROOT}/Engine.cpp
-        ${INCROOT}/Component.h
+        ${INCROOT}/Pool.h
         ${SRCROOT}/Pool.cpp
-        ${INCROOT}/Pool.h)
+        ${INCROOT}/ECS.h
+        ${SRCROOT}/ECS.cpp
+        ${INCROOT}/ComponentType.h
+        )
 
 add_library(${TARGET} SHARED ${SRC})
 

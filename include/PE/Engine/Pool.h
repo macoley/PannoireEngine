@@ -35,15 +35,17 @@ namespace PE::Engine {
             }
         }
 
+        inline std::byte *get(std::size_t n) {
+            assert(n < m_size);
+            return m_memory[n / m_chunk_size] + (n % m_chunk_size) * m_element_size;
+        }
+
         inline const std::byte *get(std::size_t n) const {
             assert(n < m_size);
             return m_memory[n / m_chunk_size] + (n % m_chunk_size) * m_element_size;
         }
 
-        inline std::byte *get(std::size_t n) {
-            assert(n < m_size);
-            return m_memory[n / m_chunk_size] + (n % m_chunk_size) * m_element_size;
-        }
+        virtual void destroy(std::size_t n) = 0;
 
     protected:
         std::vector<std::byte *> m_memory;
@@ -60,17 +62,29 @@ namespace PE::Engine {
         ObjectPool(std::size_t t_chunk_size = 8192)
                 : MemoryPool(sizeof(T), t_chunk_size) {};
 
+        virtual ~ObjectPool();
+
         inline T *get_object(std::size_t n) {
-            return static_cast<T *>(get(n));
+            return reinterpret_cast<T *>(get(n));
         }
 
         inline const T *get_object(std::size_t n) const {
-            return static_cast<const T *>(get(n));
+            return reinterpret_cast<const T *>(get(n));
         }
 
-        virtual ~ObjectPool();
+        virtual void destroy(std::size_t n) override {
+            T *object_ptr = reinterpret_cast<T *>(get(n));
+            object_ptr->~T();
+        }
+
     };
 
+    template <typename T>
+    ObjectPool<T>::~ObjectPool() {
+        for(std::size_t i = 0; i < m_size; ++i) {
+            destroy(i);
+        }
+    }
 }
 
 #endif //PANNOIREENGINE_MEMORYPOOL_H

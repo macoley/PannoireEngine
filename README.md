@@ -13,3 +13,6 @@ conan install . --profile profiles/mingw.txt --install-folder=cmake-build-debug 
 
 ## Links
 https://docs.conan.io/en/latest/integrations/clion.html
+
+## Trello
+https://trello.com/b/0R52V9eO/pannoireengine
