@@ -6,6 +6,7 @@
 #include <memory>
 #include <bitset>
 #include <vector>
+#include <gsl/gsl>
 
 #include "PE/Render/Render.h"
 #include "PE/Engine/Pool.h"
@@ -144,6 +145,10 @@ namespace PE::Engine {
         template<typename C>
         C& getComponent(ID t_id);
 
+        template <typename C>
+        C* getComponents();
+
+
     private:
         void removeComponent(ID t_id, BaseComponent::Family t_family);
 
@@ -230,7 +235,7 @@ namespace PE::Engine {
     }
 
     template<typename C>
-    C &ComponentHandler<C>::get() {
+    C& ComponentHandler<C>::get() {
         return m_manager_ptr->getComponent<C>(m_id);
     }
 
@@ -239,6 +244,13 @@ namespace PE::Engine {
         return ComponentHandler<C>(m_manager_ptr, m_id);
     }
 
+    template <typename C>
+    C* ECS::getComponents() {
+        BaseComponent::Family family = getFamily<C>();
+        assert(m_component_pools.size() > family);
+        auto pool = getComponentPool<C>();
+        return pool->get_objects();
+    }
 
 }
 

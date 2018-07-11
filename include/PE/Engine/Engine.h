@@ -7,6 +7,7 @@
 #include "PE/Engine/ComponentType.h"
 #include "PE/Render/Render.h"
 #include "PE/Engine/Pool.h"
+#include "PE/Engine/IRenderSystem.h"
 
 namespace PE::Engine {
 

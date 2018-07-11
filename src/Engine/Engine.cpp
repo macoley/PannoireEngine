@@ -14,8 +14,10 @@ namespace PE::Engine {
         entity.destroyEntity();
 
         auto entity2 = m_ecs->createEntity();
+        auto entity3 = m_ecs->createEntity();
         auto c = entity2.assignComponent<ComponentType::Transform>(.1f, .0f, .5f);
-        auto raw = c.get();
+        auto c2 = entity3.assignComponent<ComponentType::Transform>(.4f, .4f, .4f);
+        auto & raw = c.get();
 
         raw.x = 2;
 
@@ -23,15 +25,22 @@ namespace PE::Engine {
                   << raw.y << "\n"
                   << raw.z << "\n";
 
-        c = entity2.getComponent<ComponentType::Transform>();
+        auto test = m_ecs->getComponents<ComponentType::Transform>();
+        std::cout << test[0].x << "\n"
+                  << test[0].y << "\n"
+                  << test[0].z << "\n";
+        test[0].x = 4;
+
         raw = c.get();
 
         std::cout << raw.x << "\n"
                   << raw.y << "\n"
                   << raw.z << "\n";
 
-        entity2.removeComponent<ComponentType::Transform>();
+        //entity2.removeComponent<ComponentType::Transform>();
         //auto raw2 = c.get();
+
+
     }
 
 

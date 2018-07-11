@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cassert>
 #include <vector>
+#include <gsl/gsl>
 
 namespace PE::Engine {
 
@@ -20,7 +21,7 @@ namespace PE::Engine {
         {
             while(m_capacity < n)
             {
-                auto *chunk = new std::byte[m_element_size * m_chunk_size];
+                auto chunk = new std::byte[m_element_size * m_chunk_size];
                 m_memory.push_back(chunk);
                 m_capacity += m_chunk_size;
             }
@@ -70,6 +71,10 @@ namespace PE::Engine {
 
         inline const T *get_object(std::size_t n) const {
             return reinterpret_cast<const T *>(get(n));
+        }
+
+        inline T* get_objects() {
+            return *(reinterpret_cast<T**>(m_memory.data()));
         }
 
         virtual void destroy(std::size_t n) override {

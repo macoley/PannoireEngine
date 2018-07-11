@@ -12,7 +12,7 @@ set(SRC
         ${INCROOT}/ECS.h
         ${SRCROOT}/ECS.cpp
         ${INCROOT}/ComponentType.h
-        )
+        ${INCROOT}/IRenderSystem.h)
 
 add_library(${TARGET} SHARED ${SRC})
 
