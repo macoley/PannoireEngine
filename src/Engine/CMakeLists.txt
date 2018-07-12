@@ -12,7 +12,11 @@ set(SRC
         ${INCROOT}/ECS.h
         ${SRCROOT}/ECS.cpp
         ${INCROOT}/ComponentType.h
-        ${INCROOT}/IRenderSystem.h)
+        ${INCROOT}/IRenderSystem.h
+        ${INCROOT}/Entity.h
+        ${INCROOT}/ISystem.h
+        ${INCROOT}/Component.h
+        ${SRCROOT}/Component.cpp)
 
 add_library(${TARGET} SHARED ${SRC})
 

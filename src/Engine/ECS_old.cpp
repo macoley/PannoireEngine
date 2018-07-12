@@ -1,14 +1,18 @@
-
-#include "PE/Engine/ECS.h"
+#include "PE/Engine/ECS_old.h"
 
 namespace PE::Engine {
 
+    BaseComponent::Family BaseComponent::m_family_counter = 0;
+
     /*
-     * Entities
+     * ENTITY
      */
 
-    // Creating Entity
-    Entity ECS::createEntity() {
+    /*
+     * ECS
+     */
+
+    EntityHandler ECS_old::createEntity() {
         uint32_t index, version;
 
         if (m_free_entity_list.empty()) {
@@ -22,11 +26,10 @@ namespace PE::Engine {
             version = m_entity_version[index];
         }
 
-        return Entity(shared_from_this(), Entity::ID(index, version));
+        return EntityHandler(shared_from_this(), ID(index, version));
     }
 
-    // Destroying Entity
-    void ECS::destroyEntity(Entity::ID t_id) {
+    void ECS_old::destroyEntity(ID t_id) {
         const uint32_t index = t_id.index();
         auto mask = m_entity_component_mask[index];
 
@@ -42,8 +45,16 @@ namespace PE::Engine {
         m_free_entity_list.push_back(index);
     }
 
-    // Creating space for Entity
-    void ECS::accomodateEntity(uint32_t t_index) {
+    void ECS_old::removeComponent(ID t_id, BaseComponent::Family t_family) {
+        const uint32_t index = t_id.index();
+
+        m_entity_component_mask[index].reset(t_family);
+
+        auto pool = m_component_pools[t_family];
+        pool->destroy(index);
+    }
+
+    void ECS_old::accomodateEntity(uint32_t t_index) {
         if (m_entity_component_mask.size() <= t_index) {
             m_entity_component_mask.resize(t_index + 1);
             m_entity_version.resize(t_index + 1);
@@ -54,20 +65,8 @@ namespace PE::Engine {
         }
     }
 
-    Entity ECS::getEntity(Entity::ID t_id) {
-        return Entity(shared_from_this(), t_id);
-    }
-
-    /*
-     * Components
-     */
-
-    void ECS::removeComponent(Entity::ID t_id, FamilyIndex t_family) {
-        const uint32_t index = t_id.index();
-
-        m_entity_component_mask[index].reset(t_family);
-
-        m_component_pools[t_family]->destroy(index);
+    ID ECS_old::getID(uint32_t index) {
+        return ID(index, m_entity_version[index]);
     }
 
 }

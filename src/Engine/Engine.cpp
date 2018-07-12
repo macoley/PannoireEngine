@@ -3,6 +3,7 @@
 
 namespace PE::Engine {
 
+
     Engine::Engine() : m_ecs(std::make_shared<ECS>()) {
         //Render::Render render;
         //render.render("Render z engina");
@@ -11,8 +12,9 @@ namespace PE::Engine {
     void Engine::init() {
         m_ecs->registerComponent<ComponentType::Transform>();
         auto entity = m_ecs->createEntity();
-        entity.destroyEntity();
+        //entity.destroyEntity();
 
+                /*
         auto entity2 = m_ecs->createEntity();
         auto entity3 = m_ecs->createEntity();
         auto c = entity2.assignComponent<ComponentType::Transform>(.1f, .0f, .5f);
@@ -40,7 +42,7 @@ namespace PE::Engine {
         //entity2.removeComponent<ComponentType::Transform>();
         //auto raw2 = c.get();
 
-
+        */
     }
 
 
