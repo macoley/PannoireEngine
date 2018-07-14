@@ -9,7 +9,6 @@ namespace PE::Engine::ComponentType {
     };
 
     struct Render {
-        Transform transform;
         float temp;
     };
 

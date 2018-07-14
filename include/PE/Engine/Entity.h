@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "PE/Engine/ECS.h"
+#include "PE/Engine/Common.h"
 
 namespace PE::Engine {
 
@@ -37,15 +37,24 @@ namespace PE::Engine {
             uint64_t m_id;
         };
 
-        inline const Entity::ID getID() const {
+        // Wrappers (implemented in ECS.h)
+        template <typename C, typename ... Args>
+        void assignComponent(Args && ... args);
+
+        template<typename C>
+        void removeComponent();
+
+        template <typename C>
+        C& getComponent() const;
+
+        // Get ID
+        inline const ID getID() {
             return m_id;
         }
 
-        // todo wrappers on ECS
-
     private:
         Entity(std::shared_ptr<ECS> t_manager_ptr, ID t_id)
-            : m_manager_ptr(std::move(t_manager_ptr)), m_id(t_id) {}
+                : m_manager_ptr(std::move(t_manager_ptr)), m_id(t_id) {}
 
         std::shared_ptr<ECS> m_manager_ptr;
         ID m_id;

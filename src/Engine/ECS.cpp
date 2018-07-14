@@ -63,11 +63,22 @@ namespace PE::Engine {
      */
 
     void ECS::removeComponent(Entity::ID t_id, FamilyIndex t_family) {
-        const uint32_t index = t_id.index();
+        const auto index = t_id.index();
+        const auto originalMask = m_entity_component_mask[t_id.index()];
 
+        // Remove component
         m_entity_component_mask[index].reset(t_family);
-
         m_component_pools[t_family]->destroy(index);
-    }
 
+        // Remove from system
+        for (std::size_t system_index = 0; system_index < m_system_component_mask.size(); ++system_index) {
+            if(
+                    (originalMask & m_system_component_mask[system_index]) == m_system_component_mask[system_index] &&
+                    (m_entity_component_mask[index] & m_system_component_mask[system_index]) != m_system_component_mask[system_index]
+            )
+            {
+                m_systems[system_index]->removeEntity(index);
+            }
+        }
+    }
 }

@@ -73,9 +73,11 @@ namespace PE::Engine {
             return reinterpret_cast<const T *>(get(n));
         }
 
+        // WARNING
         inline T* get_objects() {
             return *(reinterpret_cast<T**>(m_memory.data()));
         }
+
 
         virtual void destroy(std::size_t n) override {
             T *object_ptr = reinterpret_cast<T *>(get(n));

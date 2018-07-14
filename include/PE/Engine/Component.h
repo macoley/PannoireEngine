@@ -1,7 +1,7 @@
 #ifndef PANNOIREENGINE_COMPONENT_H
 #define PANNOIREENGINE_COMPONENT_H
 
-#include "PE/Engine/ECS.h"
+#include "PE/Engine/Common.h"
 
 namespace PE::Engine {
 
@@ -11,9 +11,6 @@ namespace PE::Engine {
      * Base Component for template indexing
      */
     class BaseComponent {
-    public:
-        typedef std::size_t FamilyIndex;
-
     protected:
         static FamilyIndex m_family_counter;
     };
@@ -26,20 +23,20 @@ namespace PE::Engine {
         friend class ECS;
 
     public:
-        // todo wrappers on ECS?
-
-    private:
         static FamilyIndex getFamily();
+
+        // todo wrappers on ECS?
     };
 
     /*
      * Family index getter
      */
     template<typename C>
-    BaseComponent::FamilyIndex Component<C>::getFamily() {
+    FamilyIndex Component<C>::getFamily() {
         static FamilyIndex family = m_family_counter++;
         return family;
     }
+
 }
 
 #endif //PANNOIREENGINE_COMPONENT_H
