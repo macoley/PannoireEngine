@@ -11,20 +11,17 @@ namespace PE::Engine {
 
     void Engine::init() {
         m_ecs->registerComponent<ComponentType::Render>();
-        m_ecs->createSystem<RenderSystem>();
+        m_ecs->createSystem<Render::RenderSystem>();
+
         auto entity = m_ecs->createEntity();
         auto entity2 = m_ecs->createEntity();
         entity.assignComponent<ComponentType::Transform>(.5f, .2f, .1f);
+        entity.assignComponent<ComponentType::Render>(.5f);
         entity2.assignComponent<ComponentType::Transform>(.5f, .2f, .1f);
 
+        m_ecs->updateSystem<Render::RenderSystem>();
 
-        m_ecs->updateSystem<RenderSystem>();
-
-        const auto &component = entity.getComponent<ComponentType::Transform>();
-
-        std::cout << component.x << "\n"
-                  << component.y << "\n"
-                  << component.z << "\n";
+        //const auto &component = entity.getComponent<ComponentType::Transform>();
     }
 
 

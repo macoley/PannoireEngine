@@ -9,9 +9,9 @@
 
 namespace PE::Render {
 
-    class Render {
+    class Render_old {
     public:
-        Render();
+        Render_old();
         void render(std::string text);
     };
 

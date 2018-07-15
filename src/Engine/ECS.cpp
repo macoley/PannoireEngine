@@ -77,7 +77,7 @@ namespace PE::Engine {
                     (m_entity_component_mask[index] & m_system_component_mask[system_index]) != m_system_component_mask[system_index]
             )
             {
-                m_systems[system_index]->removeEntity(index);
+                m_system_cache[system_index].erase(t_id.index());
             }
         }
     }

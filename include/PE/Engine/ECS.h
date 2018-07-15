@@ -94,11 +94,11 @@ namespace PE::Engine {
          */
         template <typename ... Cargs>
         class Pack {
-            typedef std::tuple<Cargs * ...> TuplePack;
+            typedef std::tuple<typename std::remove_const<Cargs>::type * ...> TuplePack;
 
         public:
             Pack(ECS * t_parent) : m_parent(t_parent) {
-                setPool<Cargs ...>();
+                setPool<typename std::remove_const<Cargs>::type ...>();
             };
 
             inline TuplePack getArgs() {
@@ -137,7 +137,8 @@ namespace PE::Engine {
         std::vector<MemoryPool*> m_component_pools;                         // Memory pools for component
 
         std::vector<ComponentMask> m_system_component_mask;                 // System component mask
-        std::vector<BaseSystem*> m_systems;                                 // Systems
+        std::vector<EntitySet> m_system_cache;                              // Cached entries
+        std::vector<BaseSystem*> m_systems;                                 // System pointers
     };
 
     /*
@@ -190,7 +191,7 @@ namespace PE::Engine {
                     (m_entity_component_mask[t_id.index()] & m_system_component_mask[system_index]) == m_system_component_mask[system_index]
             )
             {
-                m_systems[system_index]->addEntity(t_id.index());
+                m_system_cache[system_index].insert(t_id.index());
             }
         }
     }
@@ -237,6 +238,7 @@ namespace PE::Engine {
 
         if (m_systems.size() <= index) {
             m_systems.resize(index + 1, nullptr);
+            m_system_cache.resize(index + 1);
             m_system_component_mask.resize(index + 1);
         }
 
@@ -247,7 +249,7 @@ namespace PE::Engine {
     template<typename S>
     void ECS::updateSystem() {
         const auto index = S::getSystemIndex();
-        S* system = reinterpret_cast<S*>(m_systems[index]);
+        auto system = reinterpret_cast<S*>(m_systems[index]);
 
         unpackSystem(system);
     }
@@ -256,9 +258,10 @@ namespace PE::Engine {
     template <typename ... Cargs>
     void ECS::unpackSystem(System<Cargs ...>* system)
     {
-        auto pack = Pack<Cargs ...>(this);
+        const auto index = System<Cargs ...>::getSystemIndex();
 
-        std::invoke(&System<Cargs ...>::update, system, std::get<Cargs*>(pack.getArgs())...);
+        auto pack = Pack<Cargs ...>(this);
+        std::invoke(&System<Cargs ...>::update, system, m_system_cache[index], std::get<typename std::remove_const<Cargs>::type *>(pack.getArgs())...);
     }
 
 

@@ -1,12 +1,12 @@
 
-#include "PE/Render/Render.h"
+#include "PE/Render/Render_old.h"
 
 namespace PE::Render {
-    Render::Render() {
+    Render_old::Render_old() {
 
     }
 
-    void Render::render(std::string text) {
+    void Render_old::render(std::string text) {
         const GLuint WIDTH = 800, HEIGHT = 600;
 
         std::cout << "Starting GLFW context, OpenGL 3.3" << std::endl;

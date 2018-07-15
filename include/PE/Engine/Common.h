@@ -2,6 +2,7 @@
 #define PANNOIREENGINE_COMMON_H
 
 #include <bitset>
+#include <set>
 
 namespace PE::Engine {
 
@@ -13,6 +14,7 @@ namespace PE::Engine {
     typedef std::size_t FamilyIndex;
     typedef std::size_t SystemIndex;
     typedef std::bitset<MAX_COMPONENTS> ComponentMask;
+    typedef std::set<std::uint32_t> EntitySet;
 
 }
 
