@@ -62,8 +62,8 @@ namespace PE::Engine {
         /*
          * Systems
          */
-        template <typename S>
-        void createSystem();
+        template <typename S, typename ... Args>
+        void createSystem(Args && ... args);
 
         template<typename S>
         void updateSystem();
@@ -227,14 +227,14 @@ namespace PE::Engine {
     /*
      * Systems
      */
-    template <typename S>
-    void ECS::createSystem() {
+    template <typename S, typename ... Args>
+    void ECS::createSystem(Args && ... args) {
         static_assert(std::is_base_of<BaseSystem, S>::value, "System must be inherited from System");
 
         // Todo search all entries which matched to this component mask and add them
 
         const auto index = S::getSystemIndex();
-        auto system = new S();
+        auto system = new S(std::forward<Args>(args) ...);
 
         if (m_systems.size() <= index) {
             m_systems.resize(index + 1, nullptr);

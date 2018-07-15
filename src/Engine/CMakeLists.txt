@@ -18,7 +18,8 @@ set(SRC
         ${SRCROOT}/Component.cpp
         ${INCROOT}/Common.h
         ${INCROOT}/Utils.h
-        ${SRCROOT}/System.cpp)
+        ${SRCROOT}/System.cpp
+        ${INCROOT}/IContext.h)
 
 add_library(${TARGET} SHARED ${SRC})
 

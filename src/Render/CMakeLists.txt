@@ -7,7 +7,8 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/Render)
 set(SRC
         ${INCROOT}/RenderSystem.h
         ${SRCROOT}/RenderSystem.cpp
-        )
+        ${INCROOT}/Context.h
+        ${SRCROOT}/Context.cpp )
 
 add_library(${TARGET} SHARED ${SRC})
 
