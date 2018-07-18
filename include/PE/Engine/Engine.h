@@ -9,23 +9,20 @@
 #include "PE/Engine/System.h"
 #include "PE/Engine/IContext.h"
 
-#include "PE/Render/RenderSystem.h"
-#include "PE/Render/Context.h"
-
 namespace PE::Engine {
 
     using namespace PE;
 
     class Engine {
     public:
-        Engine();
+        Engine(std::shared_ptr<IContext> t_context);
 
         void init();
 
     private:
-        inline void fixedUpdate();
-        inline void update(double alpha);
-        inline void initLoop();
+        void fixedUpdate();
+        void update(double alpha);
+        void initLoop();
 
         std::shared_ptr<ECS> m_ecs;
         std::shared_ptr<IContext> m_context;

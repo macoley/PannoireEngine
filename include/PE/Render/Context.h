@@ -17,6 +17,10 @@
 #include <GLFW/glfw3.h>
 
 #include "PE/Engine/IContext.h"
+#include "PE/Render/Shader.h"
+#include "PE/Render/Mesh.h"
+#include "PE/Render/Model.h"
+#include "PE/Render/Camera.h"
 
 namespace PE::Render {
 
@@ -26,10 +30,12 @@ namespace PE::Render {
         virtual ~Context();
 
         bool isRunning() override;
-        void render() override;
         void processInput() override;
-        virtual double getTime() override;
-        virtual void update() override;
+        double getTime() override;
+        void update() override;
+
+        void swapBuffers() override;
+        void clear() override;
 
     private:
         GLFWwindow* m_window;

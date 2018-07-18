@@ -1,20 +1,20 @@
 #include "PE/Engine/Engine.h"
 
 
+
 namespace PE::Engine {
 
-
-    Engine::Engine()
+    Engine::Engine(std::shared_ptr<IContext> t_context)
             : m_ecs(std::make_shared<ECS>()),
-              m_context(std::make_shared<PE::Render::Context>())
-    {
-    }
+              m_context(std::move(t_context))
+    {}
 
     void Engine::init() {
+        /*
         m_ecs->registerComponent<ComponentType::Transform>();
         m_ecs->registerComponent<ComponentType::Render>();
 
-        m_ecs->createSystem<Render::RenderSystem>(m_context);
+        m_ecs->createSystem<Render::RenderSystem>(m_context); // todo inject Render::RenderSystem
 
         auto entity = m_ecs->createEntity();
         auto entity2 = m_ecs->createEntity();
@@ -24,8 +24,9 @@ namespace PE::Engine {
         entity2.assignComponent<ComponentType::Render>(.5f);
 
         //const auto &component = entity.getComponent<ComponentType::Transform>();
+         */
 
-        initLoop();
+        //initLoop();
     }
 
     /**
@@ -40,13 +41,20 @@ namespace PE::Engine {
      */
     void Engine::update(double alpha) {
         // For alpha I need to create transform old and new...
-        m_ecs->updateSystem<Render::RenderSystem>();
+        //m_ecs->updateSystem<Render::RenderSystem>();
+
+
     }
 
     /**
      * Fixed timestamp loop
      */
     void Engine::initLoop() {
+
+        /**
+         * LOOP
+         */
+         /*
         double t = 0.0;
         double dt = 0.01;
 
@@ -55,11 +63,6 @@ namespace PE::Engine {
 
         while(m_context->isRunning())
         {
-            /*
-             * LOGIC
-             */
-
-            //
             double newTime = m_context->getTime();
             double frameTime = newTime - currentTime;
             if( frameTime > 0.25 )
@@ -85,7 +88,7 @@ namespace PE::Engine {
             m_context->update();
             update(alpha);
         }
+        */
     }
-
 
 }
