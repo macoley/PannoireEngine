@@ -6,7 +6,7 @@
 #include <vector>
 #include <gsl/gsl>
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     class MemoryPool {
     public:

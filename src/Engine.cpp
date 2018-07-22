@@ -1,15 +1,22 @@
-#include "PE/Engine/Engine.h"
+#include "Engine.h"
 
+#include "PE/Resource/Resource.h"
+#include "PE/Render/Texture.h"
 
+namespace PE {
 
-namespace PE::Engine {
-
-    Engine::Engine(std::shared_ptr<IContext> t_context)
-            : m_ecs(std::make_shared<ECS>()),
-              m_context(std::move(t_context))
+    Engine::Engine()
+            : m_ecs(std::make_shared<ECS::ECS>())
     {}
 
     void Engine::init() {
+
+        Resource::Exporter exporter;
+        exporter.exportShader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+        exporter.exportTexture("container.jpg");
+
+        Resource::Resource<PE::Render::Texture> res;
+
         /*
         m_ecs->registerComponent<ComponentType::Transform>();
         m_ecs->registerComponent<ComponentType::Render>();

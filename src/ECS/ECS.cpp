@@ -1,7 +1,7 @@
 
-#include "PE/Engine/ECS.h"
+#include "PE/ECS/ECS.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     /*
      * Entities

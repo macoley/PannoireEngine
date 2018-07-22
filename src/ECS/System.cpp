@@ -1,6 +1,6 @@
 
-#include "PE/Engine/System.h"
+#include "PE/ECS/System.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
     SystemIndex BaseSystem::m_system_counter = 0;
 }

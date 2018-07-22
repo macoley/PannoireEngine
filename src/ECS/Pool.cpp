@@ -1,6 +1,6 @@
-#include "PE/Engine/Pool.h"
+#include "PE/ECS/Pool.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     MemoryPool::~MemoryPool() {
         for(std::byte *ptr : m_memory) {

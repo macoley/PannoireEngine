@@ -3,9 +3,9 @@
 
 #include <cstdint>
 
-#include "PE/Engine/Common.h"
+#include "PE/ECS/Common.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     class ECS;
 

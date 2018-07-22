@@ -1,25 +1,22 @@
 
-set(TARGET pe_engine)
+set(TARGET pe_ecs)
+set(DIR ECS)
 
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/Engine)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/Engine)
+set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/${DIR})
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
-        ${INCROOT}/Engine.h
-        ${SRCROOT}/Engine.cpp
         ${INCROOT}/Pool.h
         ${SRCROOT}/Pool.cpp
         ${INCROOT}/ECS.h
         ${SRCROOT}/ECS.cpp
-        ${INCROOT}/ComponentType.h
         ${INCROOT}/Entity.h
         ${INCROOT}/System.h
         ${INCROOT}/Component.h
-        ${SRCROOT}/Component.cpp
         ${INCROOT}/Common.h
         ${INCROOT}/Utils.h
         ${SRCROOT}/System.cpp
-        ${INCROOT}/IContext.h)
+        )
 
 add_library(${TARGET} SHARED ${SRC})
 

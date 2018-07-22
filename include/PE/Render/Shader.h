@@ -17,14 +17,17 @@
 namespace PE::Render {
 
     class Shader {
+        using programID = uint32_t;
+
     public:
         Shader(const std::string & vertexPath, const std::string & fragmentPath);
+        virtual ~Shader();
 
-        inline void use() {
+        inline void use() const {
             glUseProgram(shaderProgramID);
         }
 
-        inline unsigned int getProgramID() {
+        inline programID getProgramID() const {
             return shaderProgramID;
         }
 
@@ -57,9 +60,9 @@ namespace PE::Render {
         }
 
     private:
-        unsigned int shaderProgramID;
+        programID shaderProgramID;
 
-        std::string openFile(const std::string & path);
+        //std::string openFile(const std::string & path);
     };
 
 }

@@ -4,7 +4,7 @@
 #include <bitset>
 #include <set>
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     const static std::size_t MAX_COMPONENTS = 64;   // Max components amount
 

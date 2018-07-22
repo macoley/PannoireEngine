@@ -1,10 +1,10 @@
-#ifndef PANNOIREENGINE_UTILS_H
-#define PANNOIREENGINE_UTILS_H
+#ifndef PANNOIREENGINE_ECS_UTILS_H
+#define PANNOIREENGINE_ECS_UTILS_H
 
-#include "PE/Engine/Common.h"
-#include "PE/Engine/Component.h"
+#include "PE/ECS/Common.h"
+#include "PE/ECS/Component.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     template<typename C>
     class Component;
@@ -31,4 +31,4 @@ namespace PE::Engine {
 
 }
 
-#endif //PANNOIREENGINE_UTILS_H
+#endif //PANNOIREENGINE_ECS_UTILS_H

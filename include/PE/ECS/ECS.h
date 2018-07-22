@@ -8,17 +8,15 @@
 #include <utility>
 #include <functional>
 
-#include "PE/Engine/Common.h"
-#include "PE/Engine/Utils.h"
+#include "PE/ECS/Common.h"
+#include "PE/ECS/Utils.h"
 
-#include "PE/Engine/Pool.h"
-#include "PE/Engine/Entity.h"
-#include "PE/Engine/Component.h"
-#include "PE/Engine/System.h"
+#include "PE/ECS/Pool.h"
+#include "PE/ECS/Entity.h"
+#include "PE/ECS/Component.h"
+#include "PE/ECS/System.h"
 
-#include "PE/Engine/ComponentType.h"
-
-namespace PE::Engine {
+namespace PE::ECS {
 
     class Entity;
 

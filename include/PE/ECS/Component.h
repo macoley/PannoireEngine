@@ -1,9 +1,9 @@
 #ifndef PANNOIREENGINE_COMPONENT_H
 #define PANNOIREENGINE_COMPONENT_H
 
-#include "PE/Engine/Common.h"
+#include "PE/ECS/Common.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     class ECS;
 

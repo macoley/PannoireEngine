@@ -8,10 +8,10 @@
 #include <functional>
 #include <memory>
 
-#include "PE/Engine/Common.h"
-#include "PE/Engine/Utils.h"
+#include "PE/ECS/Common.h"
+#include "PE/ECS/Utils.h"
 
-namespace PE::Engine {
+namespace PE::ECS {
 
     class ECS;
 
@@ -38,7 +38,7 @@ namespace PE::Engine {
         friend class ECS;
 
     public:
-        virtual void update(const EntitySet &, Components * ...) = 0;
+        virtual void update(Components & ...) = 0;
 
     protected:
         System() : BaseSystem(getMask<Components ...>()) {}
