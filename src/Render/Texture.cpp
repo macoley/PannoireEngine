@@ -2,22 +2,32 @@
 
 namespace PE::Render {
 
-    Texture::Texture(const Texture::byte *data, uint8_t components, Texture::size width, Texture::size height) {
+
+    void Texture::loadImageFromFile(const std::string &path) {
+        unsigned char* data;
+
+        data = stbi_load(path.c_str(), &m_width, &m_height, &m_components, 0);
+
+        if (!data) {
+            std::cout << "Texture failed to load at path: " << path << std::endl;
+        }
+
+#if !DEBUG_RESOURCE
         // Generate texture
-        glGenTextures(1, &id);
+        glGenTextures(1, &m_id);
 
         // Choose format
-        GLenum format;
-        if (components == 1)
+        GLenum format = GL_NONE;
+        if (m_components == 1)
             format = GL_RED;
-        else if (components == 3)
+        else if (m_components == 3)
             format = GL_RGB;
-        else if (components == 4)
+        else if (m_components == 4)
             format = GL_RGBA;
 
         // Bind texture and move it to VRAM
-        glBindTexture(GL_TEXTURE_2D, id);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glBindTexture(GL_TEXTURE_2D, m_id);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
 
         // Generate mipmaps
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -27,9 +37,18 @@ namespace PE::Render {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
+
+        stbi_image_free(data);
+    }
+
+    Texture::Texture(const std::string &path) {
+        loadImageFromFile(path);
     }
 
     Texture::~Texture() {
-        glDeleteTextures(1, &id);
+#if !DEBUG_RESOURCE
+        glDeleteTextures(1, &m_id);
+#endif
     }
 }

@@ -27,7 +27,7 @@ add_library(${TARGET} SHARED ${SRC})
 target_include_directories(${TARGET} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${TARGET} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-#target_compile_definitions(${TARGET} PRIVATE STB_IMAGE_IMPLEMENTATION)
+target_compile_definitions(${TARGET} PRIVATE STB_IMAGE_IMPLEMENTATION)
 
-target_link_libraries(${TARGET} PUBLIC pe_ecs CONAN_PKG::glad CONAN_PKG::glfw CONAN_PKG::glm CONAN_PKG::Assimp CONAN_PKG::gsl_microsoft)
+target_link_libraries(${TARGET} PUBLIC pe_ecs pe_resource CONAN_PKG::glad CONAN_PKG::glfw CONAN_PKG::glm CONAN_PKG::Assimp CONAN_PKG::gsl_microsoft CONAN_PKG::stb)
 

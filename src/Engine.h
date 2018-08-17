@@ -5,7 +5,8 @@
 #include <iostream>
 
 #include "PE/ECS/ECS.h"
-#include "PE/Resource/Exporter.h"
+#include "PE/Resource/ResourceManager.h"
+#include "PE/Render/Texture.h"
 
 namespace PE {
 

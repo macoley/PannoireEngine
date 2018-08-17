@@ -3,51 +3,51 @@
 
 #include <cstdint>
 #include <string>
+#include <iostream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <gsl/gsl>
+#include <stb_image.h>
 
-#include "PE/Render/Shader.h"
+#define DEBUG_RESOURCE true
 
 namespace PE::Render {
 
-    /**
-     * Texture Resource
-     */
     class Texture {
-        using byte      = unsigned char;
-        using textureID = uint32_t; // GLuint is 32bit
-        using size      = uint32_t;
-
     public:
-        Texture(const byte* data, uint8_t components, size width, size height);
+        explicit Texture(const std::string & path);
         virtual ~Texture();
 
-        inline textureID getID() const {
-            return id;
-        }
-
-        inline void bindTexture() const {
-            glBindTexture(GL_TEXTURE_2D, id);
-        }
-
-        inline void bindTextureUnit(uint8_t index) const {
-            glActiveTexture(GL_TEXTURE0 + index);
-            glBindTexture(GL_TEXTURE_2D, id);
-        }
-
-        inline void bindTextureUnitToShader(const Shader &shader, const std::string& name, uint8_t index) const {
-            glActiveTexture(GL_TEXTURE0 + index);
-
-            shader.use();
-            shader.setInt(name, index);
-
-            glBindTexture(GL_TEXTURE_2D, id);
-        }
-
     private:
-        textureID id;
+        void loadImageFromFile(const std::string& path);
+
+        uint32_t m_id; //GLuint is 32bit
+        int32_t m_width;
+        int32_t m_height;
+        int32_t m_components;
     };
+
+
+    /**
+    inline void bindTexture() const {
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+
+    inline void bindTextureUnit(uint8_t index) const {
+        glActiveTexture(GL_TEXTURE0 + index);
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+
+    inline void bindTextureUnitToShader(const Shader &shader, const std::string& name, uint8_t index) const {
+        glActiveTexture(GL_TEXTURE0 + index);
+
+        shader.use();
+        shader.setInt(name, index);
+
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+    */
 
 }
 

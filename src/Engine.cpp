@@ -1,7 +1,7 @@
 #include "Engine.h"
 
-#include "PE/Resource/Resource.h"
-#include "PE/Render/Texture.h"
+#include <memory>
+#include <stb_image.h>
 
 namespace PE {
 
@@ -11,11 +11,9 @@ namespace PE {
 
     void Engine::init() {
 
-        Resource::Exporter exporter;
-        exporter.exportShader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
-        exporter.exportTexture("container.jpg");
+        Resource::ResourceManager manager;
 
-        Resource::Resource<PE::Render::Texture> res;
+        auto test = manager.load<Render::Texture>("container.jpg");
 
         /*
         m_ecs->registerComponent<ComponentType::Transform>();

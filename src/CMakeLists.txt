@@ -8,4 +8,4 @@ add_subdirectory(Render)
 add_subdirectory(Resource)
 add_subdirectory(Component)
 
-target_link_libraries(${TARGET} PRIVATE pe_ecs pe_render pe_resource)
+target_link_libraries(${TARGET} PRIVATE pe_ecs pe_render pe_resource CONAN_PKG::stb)

@@ -3,46 +3,87 @@
 
 #include <cstdint>
 
+#include "ResourcePool.h"
+
 namespace PE::Resource {
 
-    template <typename Resource>
+    /**
+     * Resource Handle
+     * @tparam Resource
+     */
+    template<typename Resource>
     class ResourceHandle {
-        friend class ResourceManager;
+        using handleType = ResourceHandle<Resource>;
+        using resourcePoolType = ResourcePool<Resource>;
+
     public:
-        // There is no reference incrementing
-        ResourceHandle() : m_version(0) {}
 
-        ResourceHandle(const ResourceHandle<Resource>& t_other)
-                : m_index(t_other.m_index),
-                  m_version(t_other.m_version)
-        {
-            // Todo manager ref increment
+        /**
+        * Reference Counter
+        */
+        class RefCounter {
+        public:
+            RefCounter() : m_counter(1) {}
+
+            void increase() { ++m_counter; }
+
+            void decrease() { --m_counter; }
+
+            uint32_t getCount() { return m_counter; }
+
+        private:
+            uint32_t m_counter;
+        };
+
+
+        ResourceHandle(resourcePoolType *pool, resourceIndex resource)
+                : m_resource(resource), m_pool(pool), m_counter(new RefCounter) {}
+
+        ~ResourceHandle() { decRef(); }
+
+        ResourceHandle(const ResourceHandle<Resource> &obj) {
+            addRef(obj);
         }
 
-        ~ResourceHandle() {
-            // Todo manager ref decrement
+        handleType &operator=(handleType &obj) {
+            if (this != &obj) {
+                if (m_resource != obj.m_resource) {
+                    decRef();
+                    addRef(obj);
+                }
+            }
+
+            return *this;
         }
 
-        const Resource &get() const {
-            // Todo manager get resource
+        void decRef() {
+            m_counter->decrease();
+
+            if (m_counter->getCount() == 0) {
+                delete m_counter;
+                release();
+            }
         }
+
+        void addRef(const handleType &obj) {
+            m_counter = obj.m_counter;
+            m_counter->increase();
+            m_resource = obj.m_resource;
+        }
+
 
         Resource &get() {
-            // Todo manager get resource
+            return m_pool->get(m_resource);
         }
 
     private:
-        ResourceHandle(uint16_t t_index, uint16_t t_version, ResourceHandle* t_manager_ptr)
-                : m_index(t_index),
-                  m_version(t_version),
-                  m_manager_ptr(t_manager_ptr)
-        {
-            // Todo manager ref increment
+        void release() {
+            m_pool->destroyResource(m_resource);
         }
 
-        uint16_t m_index;
-        uint16_t m_version;    // 0 equals invalid
-        ResourceHandle *m_manager_ptr;
+        resourceIndex m_resource;
+        RefCounter *m_counter;
+        resourcePoolType *m_pool;
     };
 
 }
