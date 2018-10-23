@@ -13,6 +13,7 @@ set(SRC
         ${INCROOT}/Entity.h
         ${INCROOT}/System.h
         ${INCROOT}/Component.h
+        ${SRCROOT}/Component.cpp
         ${INCROOT}/Common.h
         ${INCROOT}/Utils.h
         ${SRCROOT}/System.cpp

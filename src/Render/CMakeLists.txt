@@ -8,8 +8,8 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 set(SRC
         #${INCROOT}/RenderSystem.h
         #${SRCROOT}/RenderSystem.cpp
-        #${INCROOT}/Context.h
-        #${SRCROOT}/Context.cpp
+        ${INCROOT}/Context.h
+        ${SRCROOT}/Context.cpp
         ${INCROOT}/Shader.h
         ${SRCROOT}/Shader.cpp
         #${INCROOT}/Mesh.h

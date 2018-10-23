@@ -16,31 +16,23 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "PE/Engine/IContext.h"
-#include "PE/Render/Shader.h"
-#include "PE/Render/Mesh.h"
-#include "PE/Render/Model.h"
-#include "PE/Render/Camera.h"
-
 namespace PE::Render {
 
-    class Context : public PE::Engine::IContext {
+    class Context {
     public:
         Context();
         virtual ~Context();
 
-        bool isRunning() override;
-        void processInput() override;
-        double getTime() override;
-        void update() override;
+        bool isRunning();
+        void processInput();
+        double getTime();
+        void pollEvents();
 
-        void swapBuffers() override;
-        void clear() override;
+        void swapBuffers();
+        void clear();
 
     private:
         GLFWwindow* m_window;
-
-        static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     };
 }
 

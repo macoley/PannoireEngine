@@ -6,7 +6,7 @@ set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/${DIR})
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
-        ${INCROOT}/Type.h
+        ${INCROOT}/Types.h
         )
 
 add_library(${TARGET} SHARED ${SRC})

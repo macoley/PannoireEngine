@@ -6,73 +6,22 @@ namespace PE::Render {
     const unsigned int SCR_WIDTH = 1200;
     const unsigned int SCR_HEIGHT = 1000;
 
-    float cursorX = 400, cursorY = 300;
-    bool movingCamera = false;
-    Camera camera(glm::vec3(0.5f, 0.5f, 4.0f));
-
-    void processInput2(GLFWwindow *window)
-    {
-        if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, true);
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.move(FORWARD);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.move(BACKWARD);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.move(LEFT);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.move(RIGHT);
-    }
-
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
 
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-        {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            movingCamera = true;
-
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-
-            cursorX = (float) (xpos);
-            cursorY = (float) (ypos);
-        }
-
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-        {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            movingCamera = false;
-        }
     }
 
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     {
-        camera.zoom(yoffset);
+
     }
 
     void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     {
-        if(movingCamera)
-        {
-            float xoffset = (float) (xpos - cursorX);
-            float yoffset = (float) (cursorY - ypos);
 
-            camera.rotate(xoffset, yoffset);
-
-            cursorX = (float) xpos;
-            cursorY = (float) ypos;
-        }
     }
 
-
-    // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-    // ---------------------------------------------------------------------------------------------
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-    {
-        // make sure the viewport matches the new window dimensions; note that width and
-        // height will be significantly larger than specified on retina displays.
+    void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
         glViewport(0, 0, width, height);
     }
 
@@ -87,16 +36,16 @@ namespace PE::Render {
 
         // glfw window creation
         // --------------------
-        GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "PannoireEngine", NULL, NULL);
-        if (window == NULL)
+        m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "PannoireEngine", NULL, NULL);
+        if (m_window == NULL)
         {
             std::cout << "Failed to create GLFW window" << std::endl;
             glfwTerminate();
             return;
         }
 
-        glfwMakeContextCurrent(window);
-        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+        glfwMakeContextCurrent(m_window);
+        glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 
         // glad: load all OpenGL function pointers
         // ---------------------------------------
@@ -106,26 +55,21 @@ namespace PE::Render {
             return;
         }
 
-        glfwSetScrollCallback(window, scroll_callback); // with gui
-        glfwSetCursorPosCallback(window, mouse_callback);
-        glfwSetMouseButtonCallback(window, mouse_button_callback); // with gui
+        glfwSetScrollCallback(m_window, scroll_callback); // with gui
+        glfwSetCursorPosCallback(m_window, mouse_callback);
+        glfwSetMouseButtonCallback(m_window, mouse_button_callback); // with gui
         //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
         glEnable(GL_DEPTH_TEST);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        Shader shader("1.model_loading.vs", "1.model_loading.fs");
-        //Model model("nanosuit/nanosuit.obj");
-        Model model("island/ForestScene.obj");
-
-        Shader lightingShader("shaders/lightVS.glsl", "shaders/lightFS.glsl");
-
         /*
-         * debug light
-         */
+        Shader shader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+        Model model("ForestScene.obj");
+        Shader lightingShader("shaders/lightVS.glsl", "shaders/lightFS.glsl");
 
         float vertices[] = {
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -194,6 +138,9 @@ namespace PE::Render {
 
         glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+         */
+        /*
+
         // render loop
         // -----------
         while (!glfwWindowShouldClose(window))
@@ -244,18 +191,12 @@ namespace PE::Render {
             glfwPollEvents();
         }
 
+        */
 
-        // glfw: terminate, clearing all previously allocated GLFW resources.
-        // ------------------------------------------------------------------
-        glfwTerminate();
     }
 
     Context::~Context() {
         glfwTerminate();
-    }
-
-    void Context::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-        glViewport(0, 0, width, height);
     }
 
     bool Context::isRunning() {
@@ -282,7 +223,7 @@ namespace PE::Render {
         return glfwGetTime();
     }
 
-    void Context::update() {
+    void Context::pollEvents() {
         glfwPollEvents();
     }
 

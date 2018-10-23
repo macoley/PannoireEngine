@@ -7,6 +7,9 @@
 #include "PE/ECS/ECS.h"
 #include "PE/Resource/ResourceManager.h"
 #include "PE/Render/Texture.h"
+#include "PE/Render/Shader.h"
+#include "PE/Component/Types.h"
+#include "PE/Render/Context.h"
 
 namespace PE {
 
@@ -21,6 +24,8 @@ namespace PE {
         void initLoop();
 
         std::shared_ptr<ECS::ECS> m_ecs;
+        std::shared_ptr<Resource::ResourceManager> m_res_manager;
+        std::shared_ptr<Render::Context> m_context;
     };
 
 }

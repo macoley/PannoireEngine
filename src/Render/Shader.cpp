@@ -3,7 +3,38 @@
 
 namespace PE::Render {
 
-    Shader::Shader(const std::string & vertexShader, const std::string & fragmentShader) {
+    Shader::Shader(const std::string & pathVertex, const std::string & pathFragment) {
+        compileShaders(loadSource(pathVertex), loadSource(pathFragment));
+    }
+
+
+    Shader::~Shader() {
+        glDeleteProgram(shaderProgramID);
+    }
+
+    std::string Shader::loadSource(const std::string & path) {
+        std::string shader;
+        std::ifstream file;
+        file.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+
+        try
+        {
+            std::stringstream stream;
+            file.open(path);
+            stream << file.rdbuf();
+            file.close();
+
+            shader = stream.str();
+        }
+        catch (const std::ifstream::failure & e)
+        {
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        }
+
+        return shader;
+    }
+
+    void Shader::compileShaders(const std::string &vertexSource, const std::string &fragmentSource) {
         // Temp vars
         uint32_t vertexShaderID, fragmentShaderID;
 
@@ -13,7 +44,7 @@ namespace PE::Render {
         /**
          * Vertex Shader
          */
-        const char * vertexShaderSource = vertexShader.c_str();
+        const char * vertexShaderSource = vertexSource.c_str();
         vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 
         glShaderSource(vertexShaderID, 1, &vertexShaderSource, NULL);
@@ -31,7 +62,7 @@ namespace PE::Render {
         /**
          * Fragment Shader
          */
-        const char * fragmentShaderSource = fragmentShader.c_str();
+        const char * fragmentShaderSource = fragmentSource.c_str();
         fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
         glShaderSource(fragmentShaderID, 1, &fragmentShaderSource, NULL);
@@ -67,16 +98,4 @@ namespace PE::Render {
         glDeleteShader(fragmentShaderID);
     }
 
-
-    Shader::~Shader() {
-        glDeleteProgram(shaderProgramID);
-    }
-
-
-    // Move to resource manager
-    /*
-    std::string Shader::openFile(const std::string & path) {
-
-    }
-     */
 }

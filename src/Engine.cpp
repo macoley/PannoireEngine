@@ -6,14 +6,18 @@
 namespace PE {
 
     Engine::Engine()
-            : m_ecs(std::make_shared<ECS::ECS>())
+            : m_ecs(new ECS::ECS),
+              m_res_manager(new Resource::ResourceManager),
+              m_context(new Render::Context)
     {}
 
     void Engine::init() {
 
-        Resource::ResourceManager manager;
+        auto texture = m_res_manager->load<Render::Texture>("container.jpg");
+        auto shader = m_res_manager->load<Render::Shader>("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 
-        auto test = manager.load<Render::Texture>("container.jpg");
+        //m_ecs->registerComponent<Component::Transform>();
+        //m_ecs->registerComponent<Component::Render>();
 
         /*
         m_ecs->registerComponent<ComponentType::Transform>();
@@ -31,7 +35,7 @@ namespace PE {
         //const auto &component = entity.getComponent<ComponentType::Transform>();
          */
 
-        //initLoop();
+        initLoop();
     }
 
     /**
@@ -45,10 +49,12 @@ namespace PE {
      * Free update
      */
     void Engine::update(double alpha) {
+        m_context->clear();
+
         // For alpha I need to create transform old and new...
         //m_ecs->updateSystem<Render::RenderSystem>();
 
-
+        m_context->swapBuffers();
     }
 
     /**
@@ -59,12 +65,15 @@ namespace PE {
         /**
          * LOOP
          */
-         /*
+
         double t = 0.0;
         double dt = 0.01;
 
         double currentTime = m_context->getTime();
         double accumulator = 0.0;
+
+        bool test = m_context->isRunning();
+        std::cout << test << std::endl;
 
         while(m_context->isRunning())
         {
@@ -82,7 +91,6 @@ namespace PE {
                 m_context->processInput();
                 fixedUpdate();
 
-
                 t += dt;
                 accumulator -= dt;
             }
@@ -90,10 +98,10 @@ namespace PE {
             const double alpha = accumulator / dt;
 
             // render here
-            m_context->update();
+            m_context->pollEvents();
             update(alpha);
         }
-        */
+
     }
 
 }

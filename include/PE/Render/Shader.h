@@ -62,7 +62,8 @@ namespace PE::Render {
     private:
         programID shaderProgramID;
 
-        //std::string openFile(const std::string & path);
+        std::string loadSource(const std::string & path);
+        void compileShaders(const std::string & vertexSource, const std::string & fragmentSource);
     };
 
 }
