@@ -30,6 +30,9 @@ namespace PE::Resource {
         template<typename Resource, typename ... Args>
         ResourceHandle<Resource> load(Args &&... args);
 
+        template<typename Resource>
+        std::size_t getResourceAmount();
+
     private:
         template<typename Resource>
         void createPool();
@@ -103,6 +106,22 @@ namespace PE::Resource {
         auto resourceIndex = pool->createResource(std::forward<Args>(args)...);
 
         return {pool, resourceIndex};
+    }
+
+    /**
+     * Get resource amount
+     * @tparam Resource
+     * @return
+     */
+    template<typename Resource>
+    std::size_t ResourceManager::getResourceAmount() {
+        auto index = ResourceCounter<Resource>::getFamily();
+
+        if (index >= m_pools.size()) {
+            return 0;
+        }
+
+        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())->getResourceAmount();
     }
 
 

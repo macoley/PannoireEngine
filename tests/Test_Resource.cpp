@@ -11,7 +11,27 @@ using namespace PE;
 
 TEST(testResource, initTest) {
     auto res_manager = std::make_unique<Resource::ResourceManager>();
-    EXPECT_EQ(1000, 1000);
+
+    EXPECT_EQ(0, res_manager->getResourceAmount<Render::Texture>());
+
+    {
+        auto texture = res_manager->load<Render::Texture>("container.jpg");
+        EXPECT_EQ(1, texture.getRefCount());
+        EXPECT_EQ(1, res_manager->getResourceAmount<Render::Texture>());
+        {
+            auto texture2 = texture;
+            EXPECT_EQ(2, texture2.getRefCount());
+            EXPECT_EQ(2, texture.getRefCount());
+
+            EXPECT_EQ(1, res_manager->getResourceAmount<Render::Texture>());
+        }
+        EXPECT_EQ(1, texture.getRefCount());
+
+        EXPECT_EQ(1, res_manager->getResourceAmount<Render::Texture>());
+    }
+
+    EXPECT_EQ(0, res_manager->getResourceAmount<Render::Texture>());
+
 }
 
 int main(int argc, char **argv) {

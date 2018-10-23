@@ -60,6 +60,10 @@ namespace PE::Resource {
             return m_pool->get(m_resource);
         }
 
+        uint32_t getRefCount() {
+            return m_counter->getCount();
+        }
+
     private:
         void decRef() {
             m_counter->decrease();

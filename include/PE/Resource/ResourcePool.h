@@ -33,6 +33,10 @@ namespace PE::Resource {
 
         Resource& get(resourceIndex);
 
+        std::size_t getResourceAmount() {
+            return m_pool.size();
+        }
+
     private:
         std::vector<resourcePtr>     m_pool;
         std::stack<resourceIndex>    m_free_indexes;
