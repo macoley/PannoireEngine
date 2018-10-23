@@ -45,7 +45,7 @@ namespace PE::Resource {
             addRef(obj);
         }
 
-        handleType &operator=(handleType &obj) {
+        handleType& operator=(handleType &obj) {
             if (this != &obj) {
                 if (m_resource != obj.m_resource) {
                     decRef();
@@ -56,6 +56,11 @@ namespace PE::Resource {
             return *this;
         }
 
+        Resource &get() {
+            return m_pool->get(m_resource);
+        }
+
+    private:
         void decRef() {
             m_counter->decrease();
 
@@ -71,19 +76,13 @@ namespace PE::Resource {
             m_resource = obj.m_resource;
         }
 
-
-        Resource &get() {
-            return m_pool->get(m_resource);
-        }
-
-    private:
         void release() {
             m_pool->destroyResource(m_resource);
         }
 
+        resourcePoolType *m_pool;
         resourceIndex m_resource;
         RefCounter *m_counter;
-        resourcePoolType *m_pool;
     };
 
 }

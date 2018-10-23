@@ -16,7 +16,7 @@ namespace PE {
         auto texture = m_res_manager->load<Render::Texture>("container.jpg");
         auto shader = m_res_manager->load<Render::Shader>("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 
-        //m_ecs->registerComponent<Component::Transform>();
+        m_ecs->registerComponent<Component::Transform>();
         //m_ecs->registerComponent<Component::Render>();
 
         /*

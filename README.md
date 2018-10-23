@@ -5,10 +5,9 @@ https://bintray.com/bincrafters/public-conan
 
 ## How to install
 1. Install Conan Packages Manager
-2. Add Bincrafters repository do Conan Remote (http://bincrafters.readthedocs.io/en/latest/using_packages.html)
-3.
+*2. Compile or type in cmd
 ```
-conan install . --profile profiles/mingw.txt --install-folder=cmake-build-debug --build missing
+conan install . 
 ```
 
 ## Links

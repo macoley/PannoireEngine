@@ -5,6 +5,7 @@ glm/0.9.8.5@g-truc/stable
 Assimp/4.1.0@jacmoe/stable
 gsl_microsoft/20180102@bincrafters/stable
 stb/20180214@conan/stable
+gtest/1.8.1@bincrafters/stable
 
 [options]
 Assimp:shared=True # False
