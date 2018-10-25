@@ -1,18 +1,16 @@
-#include "Engine.h"
+#include "PE/Engine/Core.h"
 
-#include <memory>
-#include <stb_image.h>
+namespace PE::Engine {
 
-namespace PE {
-
-    Engine::Engine()
+    Core::Core()
             : m_ecs(new ECS::ECS),
               m_res_manager(new Resource::ResourceManager)
     {}
 
-    void Engine::init() {
+    void Core::init() {
         // UTILS
         Utils::Locator::provide(new Utils::ConsoleLogger());
+        Utils::log("Core initializing");
 
         // RENDERER SYSTEM
         Render::init();
@@ -22,8 +20,15 @@ namespace PE {
         auto texture = m_res_manager->load<Render::Texture>("container.jpg");
         auto shader = m_res_manager->load<Render::Shader>("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 
-        m_ecs->registerComponent<Component::Transform>();
-        //m_ecs->registerComponent<Component::Render>();
+        auto config = m_res_manager->load<Engine::Properites>();
+        config->set("width", 450);
+        config->set("height", 150);
+        config->save("config.yml");
+
+        auto scene = m_res_manager->load<Engine::Scene>("scene.yml");
+
+        //m_ecs->registerComponent<Engine::Transform>();
+        //m_ecs->registerComponent<Engine::Render>();
 
         /*
         m_ecs->registerComponent<ComponentType::Transform>();
@@ -47,14 +52,14 @@ namespace PE {
     /**
      * Fixed update
      */
-    void Engine::fixedUpdate() {
+    void Core::fixedUpdate() {
 
     }
 
     /**
      * Free update
      */
-    void Engine::update(double alpha) {
+    void Core::update(double alpha) {
         m_context->clear();
 
         // For alpha I need to create transform old and new...
@@ -66,7 +71,8 @@ namespace PE {
     /**
      * Fixed timestamp loop
      */
-    void Engine::initLoop() {
+    void Core::initLoop() {
+        Utils::log("Main loop initializing");
 
         /**
          * LOOP
@@ -77,9 +83,6 @@ namespace PE {
 
         double currentTime = m_context->getTime();
         double accumulator = 0.0;
-
-        bool test = m_context->isRunning();
-        std::cout << test << std::endl;
 
         while(m_context->isRunning())
         {
@@ -108,6 +111,10 @@ namespace PE {
             update(alpha);
         }
 
+    }
+
+    Core::~Core() {
+        Utils::log("Engine turned off");
     }
 
 }

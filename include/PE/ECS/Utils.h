@@ -9,7 +9,7 @@ namespace PE::ECS {
     template<typename C>
     class Component;
 
-    // Get Component
+    // Get Engine
     template<typename C>
     FamilyIndex getComponentFamily() {
         return Component<typename std::remove_const<C>::type>::getFamily();

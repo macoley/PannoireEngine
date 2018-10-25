@@ -64,6 +64,10 @@ namespace PE::Resource {
             return m_counter->getCount();
         }
 
+        Resource* operator->() {
+            return &m_pool->get(m_resource);
+        }
+
     private:
         void decRef() {
             m_counter->decrease();

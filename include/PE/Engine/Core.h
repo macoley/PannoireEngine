@@ -1,22 +1,26 @@
-#ifndef PANNOIREENGINE_ENGINE_H
-#define PANNOIREENGINE_ENGINE_H
+#ifndef PANNOIREENGINE_CORE_H
+#define PANNOIREENGINE_CORE_H
 
 #include <memory>
 #include <iostream>
 
 #include "PE/ECS/ECS.h"
 #include "PE/Resource/ResourceManager.h"
-#include "PE/Render/Texture.h"
-#include "PE/Render/Shader.h"
-#include "PE/Component/Types.h"
 #include "PE/Render/Render.h"
 #include "PE/Utils/Utils.h"
 
-namespace PE {
+#include "PE/Render/Texture.h"
+#include "PE/Render/Shader.h"
 
-    class Engine {
+#include "Properties.h"
+#include "Scene.h"
+
+namespace PE::Engine {
+
+    class Core {
     public:
-        Engine();
+        Core();
+        virtual ~Core();
         void init();
 
     private:
@@ -32,4 +36,4 @@ namespace PE {
 }
 
 
-#endif //PANNOIREENGINE_ENGINE_H
+#endif //PANNOIREENGINE_CORE_H

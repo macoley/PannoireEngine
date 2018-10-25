@@ -1,7 +1,7 @@
 var hierarchy =
 [
     [ "PE::Engine::BaseComponent", "struct_p_e_1_1_engine_1_1_base_component.html", [
-      [ "PE::Engine::Component< C >", "struct_p_e_1_1_engine_1_1_component.html", null ]
+      [ "PE::Engine::Engine< C >", "struct_p_e_1_1_engine_1_1_component.html", null ]
     ] ],
     [ "PE::Engine::ComponentHandler< C >", "class_p_e_1_1_engine_1_1_component_handler.html", null ],
     [ "enable_shared_from_this", null, [

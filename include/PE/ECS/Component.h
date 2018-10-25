@@ -8,7 +8,7 @@ namespace PE::ECS {
     class ECS;
 
     /*
-     * Base Component for template indexing
+     * Base Engine for template indexing
      */
     class BaseComponent {
     protected:

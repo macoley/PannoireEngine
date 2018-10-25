@@ -73,7 +73,7 @@ namespace PE::ECS {
         void accomodateEntity(uint32_t t_index);
 
         /*
-         * Component
+         * Engine
          */
 
         template <typename C>
@@ -164,7 +164,7 @@ namespace PE::ECS {
     }
 
 
-    // Assign new Component
+    // Assign new Engine
     template<typename C, typename ... Args>
     void ECS::assignComponent(Entity::ID t_id, Args && ... args) {
         const auto family = getComponentFamily<C>();
@@ -194,13 +194,13 @@ namespace PE::ECS {
         }
     }
 
-    // Remove Component
+    // Remove Engine
     template<typename C>
     void ECS::removeComponent(Entity::ID t_id) {
         removeComponent(t_id, getComponentFamily<C>());
     }
 
-    // Get Component Pool
+    // Get Engine Pool
     template<typename C>
     ObjectPool<C>* ECS::getComponentPool() const {
         const auto family = getComponentFamily<C>();

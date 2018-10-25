@@ -5,7 +5,9 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace PE::Resource {
+#include "PE/Utils/Utils.h"
+
+namespace PE::Engine {
 
     class Properites {
     public:

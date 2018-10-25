@@ -1,6 +1,6 @@
-#include "PE/Resource/Properties.h"
+#include "PE/Engine/Properties.h"
 
-namespace PE::Resource {
+namespace PE::Engine {
 
 
     Properites::Properites(const std::string &path) {
@@ -18,7 +18,13 @@ namespace PE::Resource {
     }
 
     void Properites::load(const std::string &path) {
-        m_root = YAML::LoadFile(path);
+        try {
+            m_root = YAML::LoadFile(path);
+        }
+        catch (const YAML::BadFile& e)
+        {
+            Utils::logError("Can't load file " + path);
+        }
     }
 
     void Properites::save(const std::string &path) {
