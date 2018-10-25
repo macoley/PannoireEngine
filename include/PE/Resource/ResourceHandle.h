@@ -56,7 +56,7 @@ namespace PE::Resource {
             return *this;
         }
 
-        Resource &get() {
+        Resource& get() {
             return m_pool->get(m_resource);
         }
 

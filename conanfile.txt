@@ -6,9 +6,11 @@ Assimp/4.1.0@jacmoe/stable
 gsl_microsoft/20180102@bincrafters/stable
 stb/20180214@conan/stable
 gtest/1.8.1@bincrafters/stable
+yaml-cpp/0.6.2@bincrafters/stable
 
 [options]
 Assimp:shared=True # False
+yaml-cpp:shared=True
 
 [generators]
 cmake

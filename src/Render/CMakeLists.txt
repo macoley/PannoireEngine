@@ -6,6 +6,8 @@ set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/${DIR})
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
+        ${INCROOT}/Render.h
+        ${SRCROOT}/Render.cpp
         #${INCROOT}/RenderSystem.h
         #${SRCROOT}/RenderSystem.cpp
         ${INCROOT}/Context.h
@@ -29,5 +31,5 @@ target_include_directories(${TARGET} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 target_compile_definitions(${TARGET} PRIVATE STB_IMAGE_IMPLEMENTATION)
 
-target_link_libraries(${TARGET} PUBLIC pe_ecs pe_resource CONAN_PKG::glad CONAN_PKG::glfw CONAN_PKG::glm CONAN_PKG::Assimp CONAN_PKG::gsl_microsoft CONAN_PKG::stb)
+target_link_libraries(${TARGET} PUBLIC pe_ecs pe_resource pe_utils CONAN_PKG::glad CONAN_PKG::glfw CONAN_PKG::glm CONAN_PKG::Assimp CONAN_PKG::gsl_microsoft CONAN_PKG::stb)
 

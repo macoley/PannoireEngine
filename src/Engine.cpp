@@ -7,12 +7,18 @@ namespace PE {
 
     Engine::Engine()
             : m_ecs(new ECS::ECS),
-              m_res_manager(new Resource::ResourceManager),
-              m_context(new Render::Context)
+              m_res_manager(new Resource::ResourceManager)
     {}
 
     void Engine::init() {
+        // UTILS
+        Utils::Locator::provide(new Utils::ConsoleLogger());
 
+        // RENDERER SYSTEM
+        Render::init();
+        m_context = std::shared_ptr<Render::Context>(Render::createContext());
+
+        // RESOURCE MANAGER
         auto texture = m_res_manager->load<Render::Texture>("container.jpg");
         auto shader = m_res_manager->load<Render::Shader>("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 

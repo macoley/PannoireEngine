@@ -24,8 +24,10 @@ conan_cmake_run(CONANFILE conanfile.txt
 add_subdirectory(lib)
 add_subdirectory(src)
 
+
 option(PACKAGE_TESTS "Build the tests" ON)
 if(PACKAGE_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+

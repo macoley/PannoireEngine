@@ -9,7 +9,8 @@
 #include "PE/Render/Texture.h"
 #include "PE/Render/Shader.h"
 #include "PE/Component/Types.h"
-#include "PE/Render/Context.h"
+#include "PE/Render/Render.h"
+#include "PE/Utils/Utils.h"
 
 namespace PE {
 

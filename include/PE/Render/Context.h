@@ -16,11 +16,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "PE/Utils/Utils.h"
+
 namespace PE::Render {
 
     class Context {
     public:
-        Context();
+        Context(const std::string &, uint32_t, uint32_t);
         virtual ~Context();
 
         bool isRunning();

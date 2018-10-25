@@ -1,11 +1,9 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#include "PE/ECS/ECS.h"
 #include "PE/Resource/ResourceManager.h"
 #include "PE/Render/Texture.h"
 #include "PE/Render/Shader.h"
-#include "PE/Component/Types.h"
-#include "PE/Render/Context.h"
+#include "PE/Resource/Properties.h"
 
 using namespace PE;
 
@@ -32,6 +30,15 @@ TEST(testResource, initTest) {
 
     EXPECT_EQ(0, res_manager->getResourceAmount<Render::Texture>());
 
+}
+
+TEST(testResource, propertiesTest) {
+    auto res_manager = std::make_unique<Resource::ResourceManager>();
+
+    auto config = res_manager->load<Resource::Properites>();
+    config.get().set("width", 450);
+    config.get().set("height", 100);
+    config.get().save("config.yml");
 }
 
 int main(int argc, char **argv) {
