@@ -17,34 +17,18 @@ namespace PE::Engine {
         m_context = std::shared_ptr<Render::Context>(Render::createContext());
 
         // RESOURCE MANAGER
-        auto texture = m_res_manager->load<Render::Texture>("container.jpg");
-        auto shader = m_res_manager->load<Render::Shader>("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+        auto texture = m_res_manager->load<LoggerDecorator<Render::Texture>>("Container texture", "container.jpg");
+        auto shader = m_res_manager->load<LoggerDecorator<Render::Shader>>("Shader basic", "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 
-        auto config = m_res_manager->load<Engine::Properites>();
+        auto config = m_res_manager->load<LoggerDecorator<Engine::Properites>>("Application properties");
         config->set("width", 450);
         config->set("height", 150);
         config->save("config.yml");
 
-        auto scene = m_res_manager->load<Engine::Scene>("scene.yml");
+        m_ecs->registerComponent<Component::Transform>();
 
-        //m_ecs->registerComponent<Engine::Transform>();
-        //m_ecs->registerComponent<Engine::Render>();
-
-        /*
-        m_ecs->registerComponent<ComponentType::Transform>();
-        m_ecs->registerComponent<ComponentType::Render>();
-
-        m_ecs->createSystem<Render::RenderSystem>(m_context); // todo inject Render::RenderSystem
-
-        auto entity = m_ecs->createEntity();
-        auto entity2 = m_ecs->createEntity();
-        entity.assignComponent<ComponentType::Transform>(.5f, .2f, .1f);
-        entity.assignComponent<ComponentType::Render>(.5f);
-        entity2.assignComponent<ComponentType::Transform>(.5f, .2f, .1f);
-        entity2.assignComponent<ComponentType::Render>(.5f);
-
-        //const auto &component = entity.getComponent<ComponentType::Transform>();
-         */
+        // MAIN SCENE
+        auto scene = m_res_manager->load<LoggerDecorator<Engine::Scene>>("Main scene", "scene.yml", m_ecs);
 
         initLoop();
     }

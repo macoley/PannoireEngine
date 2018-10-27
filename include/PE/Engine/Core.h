@@ -14,6 +14,8 @@
 
 #include "Properties.h"
 #include "Scene.h"
+#include "LoggerDecorator.h"
+#include "Component.h"
 
 namespace PE::Engine {
 

@@ -12,6 +12,8 @@ set(SRC
         ${SRCROOT}/Scene.cpp
         ${INCROOT}/Properties.h
         ${SRCROOT}/Properties.cpp
+        ${INCROOT}/LoggerDecorator.h
+        ${INCROOT}/Component.h
         )
 
 add_library(${TARGET} SHARED ${SRC})

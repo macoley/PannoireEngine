@@ -3,28 +3,53 @@
 
 namespace PE::Engine {
 
-    Scene::Scene(const std::string &path)
-        : m_properies(path)
+    /**
+     * Scene Constructor
+     * @param path
+     * @param ecs
+     */
+    Scene::Scene(const std::string &path, std::shared_ptr<ECS::ECS> ecs)
+        : m_properies(path),
+          m_ecs(std::move(ecs))
     {
+        auto entitiesNode = m_properies.get<YAML::Node>("entities");
 
+        for (std::size_t i = 0; i < entitiesNode.size(); i++) {
+            makeEntity(entitiesNode[i]);
+        }
     }
 
     Scene::~Scene() {
+        for(auto &entity : m_entities)
+            m_ecs->destroyEntity(entity.getID());
 
+        m_entities.clear();
     }
 
     /**
-     * TODO Make some factory?
-     * @param ecs
+     * Helper
      */
-    void Scene::applyToECS(std::shared_ptr<ECS::ECS> ecs) {
-        /*
+    void Scene::makeEntity(YAML::Node entityNode) {
         auto entity = m_ecs->createEntity();
-        auto entity2 = m_ecs->createEntity();
-        entity.assignComponent<ComponentType::Transform>(.5f, .2f, .1f);
-        entity.assignComponent<ComponentType::Render>(.5f);
-        entity2.assignComponent<ComponentType::Transform>(.5f, .2f, .1f);
-        entity2.assignComponent<ComponentType::Render>(.5f);
-         */
+        auto componentsNode = entityNode["components"];
+
+        for (std::size_t i = 0; i < componentsNode.size(); i++) {
+            auto component = componentsNode[i];
+
+            // Transform component
+            if(component["type"].as<std::string>() == "Transform")
+            {
+                entity.assignComponent<Component::Transform>(
+                        component["x"].as<double>(),
+                        component["y"].as<double>(),
+                        component["z"].as<double>()
+                );
+            }
+
+            // Todo other components
+        }
+
+        m_entities.push_back(entity);
     }
+
 }

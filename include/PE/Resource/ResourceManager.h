@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <memory>
 
+#include "PE/Utils/Utils.h"
 #include "PE/Resource/Utils.h"
 #include "PE/Resource/ResourcePool.h"
 #include "PE/Resource/ResourceHandle.h"
