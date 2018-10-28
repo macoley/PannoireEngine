@@ -15,6 +15,7 @@ namespace PE::ECS {
         {
             assert(t_chunk_size > 0);
         };
+
         virtual ~MemoryPool();
 
         inline void reserve(std::size_t n)

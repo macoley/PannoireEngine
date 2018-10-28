@@ -1,42 +1,35 @@
-#ifndef PANNOIREENGINE_COMPONENT_H
-#define PANNOIREENGINE_COMPONENT_H
+#ifndef PE_ECS_COMPONENT_H
+#define PE_ECS_COMPONENT_H
 
-#include "PE/ECS/Common.h"
+#include "Defines.h"
 
 namespace PE::ECS {
-
-    class ECS;
 
     /*
      * Base Engine for template indexing
      */
-    class BaseComponent {
+    struct BaseComponent {
     protected:
-        static FamilyIndex m_family_counter;
+        static ComponentFamily m_family_counter;
     };
 
     /**
      * Component Class
      */
     template<typename C>
-    class Component : public BaseComponent {
-        friend class ECS;
-
-    public:
-        static FamilyIndex getFamily();
-
-        // todo wrappers on ECS?
+    struct Component : public BaseComponent {
+        static ComponentFamily getFamily();
     };
 
     /*
      * Family index getter
      */
     template<typename C>
-    FamilyIndex Component<C>::getFamily() {
-        static FamilyIndex family = m_family_counter++;
+    ComponentFamily Component<C>::getFamily() {
+        static ComponentFamily family = m_family_counter++;
         return family;
     }
 
 }
 
-#endif //PANNOIREENGINE_COMPONENT_H
+#endif //PE_ECS_COMPONENT_H

@@ -22,6 +22,6 @@ add_library(${TARGET} SHARED ${SRC})
 target_include_directories(${TARGET} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${TARGET} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-target_link_libraries(${TARGET} PUBLIC pe_utils pe_ecs pe_resource pe_render)
+target_link_libraries(${TARGET} PUBLIC pe_utils pe_ecs pe_resource pe_render CONAN_PKG::yaml-cpp)
 
 
