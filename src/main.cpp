@@ -4,12 +4,12 @@
 #include <utility>
 #include <tuple>
 
-#include "PE/Engine/Core.h"
+#include "PE/Engine/Engine.h"
 
 int main()
 {
-    PE::Engine::Core engine;
-    engine.init();
+    auto engine = PE::Engine::makeCore();
+    engine->init();
 
     return 0;
 }

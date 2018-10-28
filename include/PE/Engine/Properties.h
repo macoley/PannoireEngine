@@ -19,7 +19,7 @@ namespace PE::Engine {
         void save(const std::string & path);
 
         template<typename T>
-        T get(const std::string & key);
+        T get(const std::string & key) const;
 
         template<typename T>
         void set(const std::string & key, const T& value);
@@ -30,7 +30,7 @@ namespace PE::Engine {
     };
 
     template<typename T>
-    T Properites::get(const std::string &key) {
+    T Properites::get(const std::string &key) const {
         return m_root[key].as<T>();
     }
 

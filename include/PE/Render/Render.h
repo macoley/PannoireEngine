@@ -9,7 +9,7 @@
 namespace PE::Render {
 
     void init();
-    Context* createContext();
+    Context* createContext(const std::string& title, uint32_t width, uint32_t height);
 
 }
 

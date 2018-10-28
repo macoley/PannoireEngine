@@ -10,8 +10,8 @@ namespace PE::Render {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     }
 
-    Context *createContext() {
-        return new Context("PannoireEngine", 800, 600);
+    Context* createContext(const std::string& title, uint32_t width, uint32_t height) {
+        return new Context(title, width, height);
     }
 
 }

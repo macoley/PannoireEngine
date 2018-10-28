@@ -12,23 +12,27 @@ namespace PE::Engine {
         Utils::Locator::provide(new Utils::ConsoleLogger());
         Utils::log("Core initializing");
 
+        // APP CONFIG
+        auto config = m_res_manager->load<LoggerDecorator<Engine::Properites>>("Application properties", "config.yml");
+
         // RENDERER SYSTEM
         Render::init();
-        m_context = std::shared_ptr<Render::Context>(Render::createContext());
+        m_context = std::shared_ptr<Render::Context>(
+                Render::createContext(
+                    config->get<std::string>("title"),
+                    config->get<uint32_t>("width"),
+                    config->get<uint32_t>("height")
+                )
+        );
 
         // RESOURCE MANAGER
         auto texture = m_res_manager->load<LoggerDecorator<Render::Texture>>("Container texture", "container.jpg");
         auto shader = m_res_manager->load<LoggerDecorator<Render::Shader>>("Shader basic", "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 
-        auto config = m_res_manager->load<LoggerDecorator<Engine::Properites>>("Application properties");
-        config->set("width", 450);
-        config->set("height", 150);
-        config->save("config.yml");
-
         m_ecs->registerComponent<Component::Transform>();
 
         // MAIN SCENE
-        auto scene = m_res_manager->load<LoggerDecorator<Engine::Scene>>("Main scene", "scene.yml", m_ecs);
+        auto scene = m_res_manager->load<LoggerDecorator<Engine::Scene>>("Main scene", config->get<std::string>("main_scene"), m_ecs);
 
         initLoop();
     }
