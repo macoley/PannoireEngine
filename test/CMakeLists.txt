@@ -8,5 +8,5 @@ function(PE_ADD_TEST)
     set_target_properties(${PE_ADD_TEST_TESTNAME} PROPERTIES FOLDER test)
 endfunction()
 
-pe_add_test(TESTNAME Test_ECS FILES Test_ECS.cpp MODULES pe_ecs)
+pe_add_test(TESTNAME Test_ECS FILES Test_ECS.cpp MODULES pe_ecs pe_utils)
 #pe_add_test(TESTNAME Test_Resource FILES Test_Resource.cpp MODULES pe_render pe_resource pe_engine)

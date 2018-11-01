@@ -5,26 +5,35 @@
 #include <vector>
 #include <memory>
 
+#include "PE/Utils/Utils.h"
+
 #include "Defines.h"
+#include "View.h"
 #include "Component.h"
 #include "ComponentSet.h"
 //#include "Pool.h"
 
 namespace PE::ECS {
 
+    template <typename ... Component>
+    class View;
+
     /**
      * Main manager of ECS System
      */
-    class Manager {
+    class Manager
+            : public std::enable_shared_from_this<Manager>,
+              public IViewableManager
+    {
         using ComponentMask   = uint32_t;
+        using BaseComponentSetPtr = std::shared_ptr<BaseComponentSet>;
 
     public:
 
         /**
          * Entities
          */
-
-        Entity createEntity();
+        const Entity createEntity();
         void destroyEntity(Entity entity);
 
         /**
@@ -36,34 +45,57 @@ namespace PE::ECS {
         template<typename C>
         void removeComponent(Entity);
 
+        template<typename C>
+        C& getComponent(Entity);
+
+        /**
+         * Views
+         */
+
+        template <typename ... C>
+        View<C...> view();
+
+        /**
+         * Other
+         */
+         inline const Entity getEntityFromIndex(EntityIndex index) override {
+             assert(index < m_entity_version.size());
+             return getEntity(index, m_entity_version[index]);
+         }
+
     private:
 
         /**
          * Entities
          */
 
-        constexpr EntityIndex indexShift()
+        constexpr EntityIndex indexShift() const
         {
             return static_cast<EntityIndex>(std::numeric_limits<EntityIndex>::digits);
         }
 
-        inline Entity getEntity(EntityIndex index, EntityVersion version)
+        inline Entity getEntity(EntityIndex index, EntityVersion version) const
         {
             return (static_cast<Entity>(index) |
                     static_cast<Entity>(version) << indexShift());
         }
 
-        inline EntityIndex getIndex(Entity entity)
+        inline EntityIndex getIndex(Entity entity) const
         {
             return static_cast<EntityIndex>(entity & ~EntityIndex(0));
         }
 
-        inline EntityVersion getVersion(Entity entity)
+        inline EntityVersion getVersion(Entity entity) const
         {
             return static_cast<EntityVersion>(entity >> indexShift());
         }
 
         void accomodateEntity(EntityIndex);
+
+        inline bool validEntity(EntityIndex index, EntityVersion version) const {
+            return  (index < m_entity_version.size()) &&
+                    (version == m_entity_version[index]);
+        }
 
         /**
          * Components
@@ -79,7 +111,7 @@ namespace PE::ECS {
         std::vector<EntityVersion> m_entity_version;                           // Versions of each entity
         std::vector<ComponentMask> m_entity_component_mask;                    // Mask of components for each entity
 
-        std::vector<std::unique_ptr<BaseComponentSet>> m_component_pools;      // Memory pools for each component
+        std::vector<BaseComponentSetPtr> m_component_pools;                    // Memory pools for each component
     };
 
 
@@ -93,16 +125,22 @@ namespace PE::ECS {
 
     template<typename C>
     void Manager::removeComponent(Entity entity) {
-        const EntityIndex index = getIndex(entity);
-        const ComponentFamily family = Component<C>::getFamily();
+        const auto index = getIndex(entity);
+        const auto version = getVersion(entity);
+        const auto family = Component<C>::getFamily();
+
+        assert(validEntity(index, version));
 
         removeComponent(index, family);
     }
 
     template<typename C, typename... Args>
     void Manager::assignComponent(Entity entity, Args &&... args) {
-        const EntityIndex index = getIndex(entity);
-        const ComponentFamily family = Component<C>::getFamily();
+        const auto index = getIndex(entity);
+        const auto version = getVersion(entity);
+        const auto family = Component<C>::getFamily();
+
+        assert(validEntity(index, version));
 
         if(family >= m_component_pools.size())
         {
@@ -111,8 +149,35 @@ namespace PE::ECS {
             assert(m_component_pools.size()-1 == family); // if components were created only here?
         }
 
-        static_cast<ComponentSet<C>*>(m_component_pools[family].get())->add(index, std::forward<Args>(args)...);
+        std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
+                ->add(index, std::forward<Args>(args)...);
 
+        Utils::log(std::to_string(family) + " Component added to " + std::to_string(index) + " Entity.");
+    }
+
+    template<typename... C>
+    View<C ...> Manager::view() {
+        return View<C...>(
+                shared_from_this(),
+                std::static_pointer_cast<ComponentSet<C>>(m_component_pools[Component<C>::getFamily()]) ...
+        );
+    }
+
+    /**
+     * Get Component
+     * @tparam C
+     * @return
+     */
+    template<typename C>
+    C &Manager::getComponent(Entity entity) {
+        const auto index = getIndex(entity);
+        const auto version = getVersion(entity);
+        const auto family = Component<C>::getFamily();
+
+        assert(validEntity(index, version));
+
+        return std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
+                ->get(index);
     }
 
 }

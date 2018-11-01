@@ -21,23 +21,41 @@ namespace PE::ECS {
         using DataIndex = std::size_t;
         enum : DataIndex { INVALID_ENTITY = ~DataIndex(0) };
 
+        using ComponentVector   = std::vector<C>;
+        using DataIndexVector   = std::vector<DataIndex>;
+        using EntityIndexVector = std::vector<EntityIndex>;
+
+        using Iterator = EntityIndexVector::iterator;
+
     public:
         ComponentSet() {};
         virtual ~ComponentSet() = default;
 
-        C &get(EntityIndex) const;
+        C &get(EntityIndex);
 
         template<typename ... Args>
         void add(EntityIndex, Args && ... args);
 
         void destroy(EntityIndex) override;
 
-    private:
+        inline Iterator begin() {
+            return m_direct.begin();
+        }
+
+        inline Iterator end() {
+            return m_direct.end();
+        }
+
+        inline std::size_t size() {
+            return m_direct.size();
+        }
+
         inline bool has(EntityIndex) const;
 
-        std::vector<C> m_data;
-        std::vector<DataIndex> m_reverse;  // like proxy entry --> component (can be invalid)
-        std::vector<EntityIndex> m_direct; // for iterate, list of entries //todo swap on Entity not EntityIndex?
+    private:
+        ComponentVector   m_data;
+        DataIndexVector   m_reverse;  // like proxy entry --> component (can be invalid)
+        EntityIndexVector m_direct;   // for iterate, list of entries
     };
 
     /**
@@ -47,10 +65,10 @@ namespace PE::ECS {
      * @return
      */
     template<typename C>
-    C &ComponentSet<C>::get(EntityIndex index) const {
+    C &ComponentSet<C>::get(EntityIndex index) {
         assert(has(index));
 
-        return m_data[m_reverse[index] - 1]; // because 0 is invalid
+        return m_data[m_reverse[index]]; // because 0 is invalid
     }
 
     /**
@@ -108,7 +126,8 @@ namespace PE::ECS {
         }
 
         std::size_t dataIndex = m_data.size();
-        m_data.emplace_back(std::forward<Args>(args) ...);
+        //m_data.emplace_back(std::forward<Args>(args) ...); // or below
+        m_data.push_back({std::forward<Args>(args) ...});
         m_reverse[entityIndex] = dataIndex;
         m_direct.push_back(entityIndex);
     }
