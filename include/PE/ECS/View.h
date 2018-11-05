@@ -12,28 +12,18 @@
 namespace PE::ECS {
 
     /**
-     * Manager Viewable Interface
-     */
-    class IViewableManager {
-    public:
-        virtual const Entity getEntityFromIndex(EntityIndex index) = 0;
-    };
-
-    /**
      * View class
      * @tparam C
      */
     template <typename ... C>
     class View {
-        using ManagerPtr = std::shared_ptr<IViewableManager>;
         template <typename T>
         using ComponentSetPtr = std::shared_ptr<ComponentSet<T>>;
         using ComponentsTuple = std::tuple<ComponentSetPtr<C> ...>;
 
     public:
-        explicit View(ManagerPtr manager, ComponentSetPtr<C> ... pools)
-                : m_manager(manager),
-                  m_pools(pools ...)
+        explicit View(ComponentSetPtr<C> ... pools)
+                : m_pools(pools ...)
         {
 
             //Utils::log("Smallest pool: " + std::to_string(m_min_index));
@@ -68,19 +58,13 @@ namespace PE::ECS {
 
         }
 
-        inline bool isValid(EntityIndex index) {
-            return std::get<ComponentSet<C>>(m_pools).has(index);
-        }
-
-        template <typename ... Comp>
-        void each(ComponentSet<Comp>* ... pools)
+        void each()
         {
 
 
 
         }
 
-        ManagerPtr m_manager;
         ComponentsTuple m_pools;
     };
 

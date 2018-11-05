@@ -5,11 +5,12 @@
 #include <cassert>
 
 #include "Defines.h"
+#include "Entity.h"
 
 namespace PE::ECS {
 
     struct BaseComponentSet {
-        virtual void destroy(EntityIndex) = 0;
+        virtual void destroy(Entity) = 0;
     };
 
     /**
@@ -23,20 +24,20 @@ namespace PE::ECS {
 
         using ComponentVector   = std::vector<C>;
         using DataIndexVector   = std::vector<DataIndex>;
-        using EntityIndexVector = std::vector<EntityIndex>;
+        using EntityVector = std::vector<Entity>;
 
-        using Iterator = EntityIndexVector::iterator;
+        using Iterator = EntityVector::iterator;
 
     public:
         ComponentSet() {};
         virtual ~ComponentSet() = default;
 
-        C &get(EntityIndex);
+        C &get(Entity);
 
         template<typename ... Args>
-        void add(EntityIndex, Args && ... args);
+        void add(Entity, Args && ... args);
 
-        void destroy(EntityIndex) override;
+        void destroy(Entity) override;
 
         inline Iterator begin() {
             return m_direct.begin();
@@ -50,12 +51,12 @@ namespace PE::ECS {
             return m_direct.size();
         }
 
-        inline bool has(EntityIndex) const;
+        inline bool has(Entity) const;
 
     private:
         ComponentVector   m_data;
         DataIndexVector   m_reverse;  // like proxy entry --> component (can be invalid)
-        EntityIndexVector m_direct;   // for iterate, list of entries
+        EntityVector      m_direct;   // for iterate, list of entries
     };
 
     /**
@@ -65,10 +66,10 @@ namespace PE::ECS {
      * @return
      */
     template<typename C>
-    C &ComponentSet<C>::get(EntityIndex index) {
-        assert(has(index));
+    C &ComponentSet<C>::get(Entity entity) {
+        assert(has(entity));
 
-        return m_data[m_reverse[index]]; // because 0 is invalid
+        return m_data[m_reverse[getIndex(entity)]]; // because 0 is invalid
     }
 
     /**
@@ -78,7 +79,8 @@ namespace PE::ECS {
      * @return
      */
     template<typename C>
-    bool ComponentSet<C>::has(EntityIndex index) const {
+    bool ComponentSet<C>::has(Entity entity) const {
+        auto index = getIndex(entity);
         return index < m_reverse.size() && m_reverse[index] != INVALID_ENTITY;
     }
 
@@ -89,9 +91,10 @@ namespace PE::ECS {
      * @param index
      */
     template<typename C>
-    void ComponentSet<C>::destroy(EntityIndex entityIndex) {
-        assert(has(entityIndex));
+    void ComponentSet<C>::destroy(Entity entity) {
+        assert(has(entity));
 
+        auto entityIndex = getIndex(entity);
         auto dataIndex = m_reverse[entityIndex];
 
         // direct and data have the same algorithm => only pushing last element into just deleted
@@ -100,10 +103,10 @@ namespace PE::ECS {
         m_data[dataIndex] = std::move(tmp);
         m_data.pop_back();
 
-        const auto back = m_direct.back();
-        auto &candidate = m_reverse[entityIndex];
-        m_reverse[back] = candidate;
-        m_direct[candidate] = back;
+        const auto back = m_direct.back();          // entity
+        auto &candidate = m_reverse[entityIndex];   // dataIndex
+        m_reverse[getIndex(back)] = candidate;      // reverse[entity] = dataIndex
+        m_direct[candidate] = back;                 // direct[dataIndex] = entity
         candidate = INVALID_ENTITY;
         m_direct.pop_back();
 
@@ -118,8 +121,10 @@ namespace PE::ECS {
      */
     template<typename C>
     template<typename... Args>
-    void ComponentSet<C>::add(EntityIndex entityIndex, Args &&... args) {
-        assert(!has(entityIndex));
+    void ComponentSet<C>::add(Entity entity, Args &&... args) {
+        assert(!has(entity));
+
+        auto entityIndex = getIndex(entity);
 
         if (entityIndex >= m_reverse.size()) {
             m_reverse.resize(entityIndex + 1, INVALID_ENTITY);
@@ -129,7 +134,7 @@ namespace PE::ECS {
         //m_data.emplace_back(std::forward<Args>(args) ...); // or below
         m_data.push_back({std::forward<Args>(args) ...});
         m_reverse[entityIndex] = dataIndex;
-        m_direct.push_back(entityIndex);
+        m_direct.push_back(entity);
     }
 
 

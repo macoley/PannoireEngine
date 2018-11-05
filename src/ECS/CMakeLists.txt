@@ -17,6 +17,7 @@ set(SRC
         ${SRCROOT}/ComponentSet.cpp
         ${INCROOT}/View.h
         ${SRCROOT}/View.cpp
+        ${INCROOT}/Entity.h
         )
 
 add_library(${TARGET} SHARED ${SRC})

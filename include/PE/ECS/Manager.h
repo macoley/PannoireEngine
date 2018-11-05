@@ -8,6 +8,7 @@
 #include "PE/Utils/Utils.h"
 
 #include "Defines.h"
+#include "Entity.h"
 #include "View.h"
 #include "Component.h"
 #include "ComponentSet.h"
@@ -22,8 +23,7 @@ namespace PE::ECS {
      * Main manager of ECS System
      */
     class Manager
-            : public std::enable_shared_from_this<Manager>,
-              public IViewableManager
+            : public std::enable_shared_from_this<Manager>
     {
         using ComponentMask   = uint32_t;
         using BaseComponentSetPtr = std::shared_ptr<BaseComponentSet>;
@@ -55,40 +55,11 @@ namespace PE::ECS {
         template <typename ... C>
         View<C...> view();
 
-        /**
-         * Other
-         */
-         inline const Entity getEntityFromIndex(EntityIndex index) override {
-             assert(index < m_entity_version.size());
-             return getEntity(index, m_entity_version[index]);
-         }
-
     private:
 
         /**
          * Entities
          */
-
-        constexpr EntityIndex indexShift() const
-        {
-            return static_cast<EntityIndex>(std::numeric_limits<EntityIndex>::digits);
-        }
-
-        inline Entity getEntity(EntityIndex index, EntityVersion version) const
-        {
-            return (static_cast<Entity>(index) |
-                    static_cast<Entity>(version) << indexShift());
-        }
-
-        inline EntityIndex getIndex(Entity entity) const
-        {
-            return static_cast<EntityIndex>(entity & ~EntityIndex(0));
-        }
-
-        inline EntityVersion getVersion(Entity entity) const
-        {
-            return static_cast<EntityVersion>(entity >> indexShift());
-        }
 
         void accomodateEntity(EntityIndex);
 
@@ -100,7 +71,7 @@ namespace PE::ECS {
         /**
          * Components
          */
-        inline void removeComponent(EntityIndex, ComponentFamily);
+        inline void removeComponent(Entity, ComponentFamily);
 
         /**
          * Data
@@ -118,20 +89,19 @@ namespace PE::ECS {
     /**
      *  Removing Component
      */
-    void Manager::removeComponent(EntityIndex index, ComponentFamily family) {
-        m_entity_component_mask[index] = m_entity_component_mask[index] & ~(ComponentMask(1) << family);
-        m_component_pools[family]->destroy(index);
+    void Manager::removeComponent(Entity entity, ComponentFamily family) {
+        const auto index = getIndex(entity);
+
+        assert(validEntity(index, getVersion(entity)));
+
+        m_entity_component_mask[index] &= ~(ComponentMask(1) << family);
+        m_component_pools[family]->destroy(entity);
     }
 
     template<typename C>
     void Manager::removeComponent(Entity entity) {
-        const auto index = getIndex(entity);
-        const auto version = getVersion(entity);
         const auto family = Component<C>::getFamily();
-
-        assert(validEntity(index, version));
-
-        removeComponent(index, family);
+        removeComponent(entity, family);
     }
 
     template<typename C, typename... Args>
@@ -150,7 +120,7 @@ namespace PE::ECS {
         }
 
         std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
-                ->add(index, std::forward<Args>(args)...);
+                ->add(entity, std::forward<Args>(args)...);
 
         Utils::log(std::to_string(family) + " Component added to " + std::to_string(index) + " Entity.");
     }
@@ -158,7 +128,6 @@ namespace PE::ECS {
     template<typename... C>
     View<C ...> Manager::view() {
         return View<C...>(
-                shared_from_this(),
                 std::static_pointer_cast<ComponentSet<C>>(m_component_pools[Component<C>::getFamily()]) ...
         );
     }
@@ -177,7 +146,7 @@ namespace PE::ECS {
         assert(validEntity(index, version));
 
         return std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
-                ->get(index);
+                ->get(entity);
     }
 
 }

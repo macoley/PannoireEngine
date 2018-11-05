@@ -39,7 +39,7 @@ namespace PE::ECS {
         for (ComponentFamily family = 0; family < m_component_pools.size() /* it means for every component */; ++family) {
             if(mask & (ComponentFamily (1) << family))
             {
-                removeComponent(index, family);
+                removeComponent(entity, family);
             }
         }
 
