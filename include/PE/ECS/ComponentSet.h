@@ -6,38 +6,34 @@
 
 #include "Defines.h"
 #include "Entity.h"
+#include "PE/Utils/Utils.h"
 
 namespace PE::ECS {
 
-    struct BaseComponentSet {
-        virtual void destroy(Entity) = 0;
-    };
+    class BaseSet {
+    protected:
+        using base = BaseSet;
 
-    /**
-     * Component Set
-     * @tparam C
-     */
-    template<typename C>
-    class ComponentSet : public BaseComponentSet {
         using DataIndex = std::size_t;
-        enum : DataIndex { INVALID_ENTITY = ~DataIndex(0) };
+        enum : DataIndex {
+            VALID_ENTITY   =  DataIndex(0),
+            INVALID_ENTITY = ~DataIndex(0)
+        };
 
-        using ComponentVector   = std::vector<C>;
         using DataIndexVector   = std::vector<DataIndex>;
-        using EntityVector = std::vector<Entity>;
+        using EntityVector      = std::vector<Entity>;
+        using Iterator          = EntityVector::iterator;
 
-        using Iterator = EntityVector::iterator;
+        DataIndexVector   m_reverse;  // like proxy entry --> component (can be invalid)
+        EntityVector      m_direct;   // for iterate, list of entries
 
     public:
-        ComponentSet() {};
-        virtual ~ComponentSet() = default;
+        BaseSet() = default;
+        virtual ~BaseSet() = default;
 
-        C &get(Entity);
+        virtual void destroy(Entity);
 
-        template<typename ... Args>
-        void add(Entity, Args && ... args);
-
-        void destroy(Entity) override;
+        virtual void add(Entity);
 
         inline Iterator begin() {
             return m_direct.begin();
@@ -47,42 +43,42 @@ namespace PE::ECS {
             return m_direct.end();
         }
 
-        inline std::size_t size() {
+        inline std::size_t size() const {
             return m_direct.size();
         }
 
-        inline bool has(Entity) const;
-
-    private:
-        ComponentVector   m_data;
-        DataIndexVector   m_reverse;  // like proxy entry --> component (can be invalid)
-        EntityVector      m_direct;   // for iterate, list of entries
+        inline bool has(Entity entity) const {
+            auto index = getIndex(entity);
+            return index < m_reverse.size() && m_reverse[index] != INVALID_ENTITY;
+        };
     };
 
     /**
-     * Getting Component
+     * Component Set
      * @tparam C
-     * @param index
-     * @return
      */
     template<typename C>
-    C &ComponentSet<C>::get(Entity entity) {
-        assert(has(entity));
+    class ComponentSet : public BaseSet {
+    protected:
+        using ComponentVector   = std::vector<C>;
 
-        return m_data[m_reverse[getIndex(entity)]]; // because 0 is invalid
-    }
+        ComponentVector   m_data;
 
-    /**
-     * Checking if entity exists
-     * @tparam C
-     * @param index
-     * @return
-     */
-    template<typename C>
-    bool ComponentSet<C>::has(Entity entity) const {
-        auto index = getIndex(entity);
-        return index < m_reverse.size() && m_reverse[index] != INVALID_ENTITY;
-    }
+    public:
+        ComponentSet() = default;
+        virtual ~ComponentSet() = default;
+
+        inline C &get(Entity entity) {
+            assert(has(entity));
+            return m_data[m_reverse[getIndex(entity)]];
+        }
+
+        // Empty args override old (i hope so)
+        template<typename... Args>
+        void add(Entity, Args &&...);
+
+        void destroy(Entity) override;
+    };
 
 
     /**
@@ -94,22 +90,14 @@ namespace PE::ECS {
     void ComponentSet<C>::destroy(Entity entity) {
         assert(has(entity));
 
-        auto entityIndex = getIndex(entity);
-        auto dataIndex = m_reverse[entityIndex];
-
-        // direct and data have the same algorithm => only pushing last element into just deleted
+        auto dataIndex = m_reverse[getIndex(entity)];
 
         auto tmp = std::move(m_data.back());
         m_data[dataIndex] = std::move(tmp);
         m_data.pop_back();
 
-        const auto back = m_direct.back();          // entity
-        auto &candidate = m_reverse[entityIndex];   // dataIndex
-        m_reverse[getIndex(back)] = candidate;      // reverse[entity] = dataIndex
-        m_direct[candidate] = back;                 // direct[dataIndex] = entity
-        candidate = INVALID_ENTITY;
-        m_direct.pop_back();
-
+        // direct and data have the same algorithm => only pushing last element into just deleted
+        base::destroy(entity);
     }
 
     /**
@@ -124,18 +112,16 @@ namespace PE::ECS {
     void ComponentSet<C>::add(Entity entity, Args &&... args) {
         assert(!has(entity));
 
+        base::add(entity);
+
         auto entityIndex = getIndex(entity);
 
-        if (entityIndex >= m_reverse.size()) {
-            m_reverse.resize(entityIndex + 1, INVALID_ENTITY);
-        }
-
         std::size_t dataIndex = m_data.size();
-        //m_data.emplace_back(std::forward<Args>(args) ...); // or below
         m_data.push_back({std::forward<Args>(args) ...});
         m_reverse[entityIndex] = dataIndex;
-        m_direct.push_back(entity);
     }
+
+
 
 
 }

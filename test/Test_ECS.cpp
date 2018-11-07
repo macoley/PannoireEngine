@@ -20,7 +20,7 @@ TEST(testECS, initTest) {
     auto manager = ECS::MakeECS();
     auto entity = manager->createEntity();
     manager->assignComponent<TestComponent>(entity, 1, 2, 3);
-    manager->assignComponent<TestComponent2>(entity, 1);
+    manager->assignComponent<TestComponent2>(entity);
     auto& component = manager->getComponent<TestComponent>(entity);
 
     EXPECT_EQ(2, component.b);

@@ -26,7 +26,7 @@ namespace PE::ECS {
             : public std::enable_shared_from_this<Manager>
     {
         using ComponentMask   = uint32_t;
-        using BaseComponentSetPtr = std::shared_ptr<BaseComponentSet>;
+        using BaseSetPtr      = std::shared_ptr<BaseSet>;
 
     public:
 
@@ -76,13 +76,13 @@ namespace PE::ECS {
         /**
          * Data
          */
-        EntityIndex m_entity_index_counter = 0;                                // Index counter
-        std::vector<EntityIndex> m_free_entity_list;                           // List of free indexes
+        EntityIndex m_entity_index_counter = 0;                  // Index counter
+        std::vector<EntityIndex> m_free_entity_list;             // List of free indexes
 
-        std::vector<EntityVersion> m_entity_version;                           // Versions of each entity
-        std::vector<ComponentMask> m_entity_component_mask;                    // Mask of components for each entity
+        std::vector<EntityVersion> m_entity_version;             // Versions of each entity
+        std::vector<ComponentMask> m_entity_component_mask;      // Mask of components for each entity
 
-        std::vector<BaseComponentSetPtr> m_component_pools;                    // Memory pools for each component
+        std::vector<BaseSetPtr> m_component_pools;               // Memory pools for each component
     };
 
 

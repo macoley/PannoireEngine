@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <tuple>
+#include <functional>
 
 #include "PE/Utils/Utils.h"
 
@@ -15,56 +16,47 @@ namespace PE::ECS {
      * View class
      * @tparam C
      */
-    template <typename ... C>
+    template <typename ... Comp>
     class View {
         template <typename T>
         using ComponentSetPtr = std::shared_ptr<ComponentSet<T>>;
-        using ComponentsTuple = std::tuple<ComponentSetPtr<C> ...>;
+        using BaseSetPtr      = std::shared_ptr<BaseSet>;
+
+        using ComponentsTuple = std::tuple<ComponentSetPtr<Comp> ...>;
+        using ComponentsArray = std::array<BaseSetPtr, sizeof...(Comp)>;
+
+        using Function = std::function<void(const Entity, Comp& ...)>;
 
     public:
-        explicit View(ComponentSetPtr<C> ... pools)
-                : m_pools(pools ...)
+        explicit View(ComponentSetPtr<Comp> ... pools)
+                :   m_base_pools{std::static_pointer_cast<BaseSet>(pools) ...},
+                    m_pools(pools ...)
         {
+            static_assert(sizeof...(Comp) > 0);
 
-            //Utils::log("Smallest pool: " + std::to_string(m_min_index));
+            std::sort(m_base_pools.begin(), m_base_pools.end(), [](const auto& a, const auto& b) {
+                return a->size() < b->size();
+            });
+
+            Utils::log("Creating view with size: " + std::to_string(sizeof...(Comp)));
 
         };
+
+
+        void each(Function fnc)
+        {
+            BaseSetPtr smallestPool = m_base_pools[0];
+
+            for(auto i = smallestPool->begin(); i != smallestPool->end(); i++)
+            {
+
+            }
+
+        }
+
 
     private:
-
-        // Get Mask from Template
-        template <typename Single>
-        std::size_t min() const
-        {
-            return std::get<ComponentSet<Single>>(m_pools).size();
-        };
-
-        // * must has first and second for overloading
-        template <typename First, typename Second, typename ... Rest>
-        std::size_t min() const
-        {
-            const auto first = min<First>();
-            const auto rest = min<Second, Rest ...>();
-
-            return  first < rest ? first : rest;
-        };
-
-        template <typename Candidate>
-        void iterate()
-        {
-            if(min<Candidate> != min<C ...>)
-                return;
-
-
-        }
-
-        void each()
-        {
-
-
-
-        }
-
+        ComponentsArray m_base_pools;
         ComponentsTuple m_pools;
     };
 
