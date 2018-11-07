@@ -23,6 +23,7 @@ namespace PE::ECS {
         using DataIndexVector   = std::vector<DataIndex>;
         using EntityVector      = std::vector<Entity>;
         using Iterator          = EntityVector::iterator;
+        using CIterator         = EntityVector::const_iterator;
 
         DataIndexVector   m_reverse;  // like proxy entry --> component (can be invalid)
         EntityVector      m_direct;   // for iterate, list of entries
@@ -43,6 +44,14 @@ namespace PE::ECS {
             return m_direct.end();
         }
 
+        inline CIterator cbegin() const {
+            return m_direct.cbegin();
+        }
+
+        inline CIterator cend() const {
+            return m_direct.cend();
+        }
+
         inline std::size_t size() const {
             return m_direct.size();
         }
@@ -51,6 +60,12 @@ namespace PE::ECS {
             auto index = getIndex(entity);
             return index < m_reverse.size() && m_reverse[index] != INVALID_ENTITY;
         };
+
+        // unsecure
+        inline bool fast(Entity entity) const {
+            return m_reverse[getIndex(entity)] != INVALID_ENTITY;
+        };
+
     };
 
     /**

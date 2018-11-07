@@ -36,6 +36,8 @@ namespace PE::ECS {
         const Entity createEntity();
         void destroyEntity(Entity entity);
 
+        inline void expand(size_t);
+
         /**
          * Components
          */
@@ -60,9 +62,6 @@ namespace PE::ECS {
         /**
          * Entities
          */
-
-        void accomodateEntity(EntityIndex);
-
         inline bool validEntity(EntityIndex index, EntityVersion version) const {
             return  (index < m_entity_version.size()) &&
                     (version == m_entity_version[index]);
@@ -121,8 +120,6 @@ namespace PE::ECS {
 
         std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
                 ->add(entity, std::forward<Args>(args)...);
-
-        Utils::log(std::to_string(family) + " Component added to " + std::to_string(index) + " Entity.");
     }
 
     template<typename... C>
@@ -147,6 +144,15 @@ namespace PE::ECS {
 
         return std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
                 ->get(entity);
+    }
+
+    /**
+     * Expand
+     * @param size
+     */
+    void Manager::expand(size_t size) {
+        m_entity_component_mask.resize(size);
+        m_entity_version.resize(size);
     }
 
 }
