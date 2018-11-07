@@ -25,6 +25,8 @@ namespace PE::ECS {
             version = m_entity_version[index];
         }
 
+        Utils::log(std::to_string(index) + " Entity created.");
+
         return getEntity(index, version);
     }
 
@@ -47,6 +49,8 @@ namespace PE::ECS {
         m_entity_component_mask[index] = 0;
         m_entity_version[index]++;
         m_free_entity_list.push_back(index);
+
+        Utils::log(std::to_string(index)+ " Entity destroyed.");
     }
 
 }

@@ -30,7 +30,7 @@ namespace PE::Engine {
         void update(double alpha);
         void initLoop();
 
-        std::shared_ptr<ECS::ECS> m_ecs;
+        std::shared_ptr<ECS::Manager> m_ecs;
         std::shared_ptr<Resource::ResourceManager> m_res_manager;
         std::shared_ptr<Render::Context> m_context;
     };

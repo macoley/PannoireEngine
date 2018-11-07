@@ -8,7 +8,7 @@ namespace PE::Engine {
      * @param path
      * @param ecs
      */
-    Scene::Scene(const std::string &path, std::shared_ptr<ECS::ECS> ecs)
+    Scene::Scene(const std::string &path, std::shared_ptr<ECS::Manager> ecs)
         : m_properies(path),
           m_ecs(std::move(ecs))
     {
@@ -21,7 +21,7 @@ namespace PE::Engine {
 
     Scene::~Scene() {
         for(auto &entity : m_entities)
-            m_ecs->destroyEntity(entity.getID());
+            m_ecs->destroyEntity(entity);
 
         m_entities.clear();
     }
@@ -39,7 +39,8 @@ namespace PE::Engine {
             // Transform component
             if(component["type"].as<std::string>() == "Transform")
             {
-                entity.assignComponent<Component::Transform>(
+                m_ecs->assignComponent<Component::Transform>(
+                        entity,
                         component["x"].as<double>(),
                         component["y"].as<double>(),
                         component["z"].as<double>()

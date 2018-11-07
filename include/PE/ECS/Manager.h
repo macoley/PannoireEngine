@@ -120,6 +120,8 @@ namespace PE::ECS {
 
         std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
                 ->add(entity, std::forward<Args>(args)...);
+
+        Utils::log(std::to_string(family) + " Component added to " + std::to_string(index) + " Entity.");
     }
 
     template<typename... C>

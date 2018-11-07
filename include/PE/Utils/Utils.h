@@ -9,8 +9,13 @@
  */
 namespace PE::Utils {
 
-    void log(const std::string &);
-    void logError(const std::string &);
+    inline void log(const std::string & text) {
+        Locator::getLogger()->log(text);
+    }
+
+    inline void logError(const std::string & text) {
+        Locator::getLogger()->log("[ERROR] " + text);
+    }
 
 }
 

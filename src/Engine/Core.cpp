@@ -3,7 +3,7 @@
 namespace PE::Engine {
 
     Core::Core()
-            : m_ecs(new ECS::ECS),
+            : m_ecs(ECS::MakeECS()),
               m_res_manager(new Resource::ResourceManager)
     {}
 
@@ -28,8 +28,6 @@ namespace PE::Engine {
         // RESOURCE MANAGER
         auto texture = m_res_manager->load<LoggerDecorator<Render::Texture>>("Container texture", "container.jpg");
         auto shader = m_res_manager->load<LoggerDecorator<Render::Shader>>("Shader basic", "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
-
-        m_ecs->registerComponent<Component::Transform>();
 
         // MAIN SCENE
         auto scene = m_res_manager->load<LoggerDecorator<Engine::Scene>>("Main scene", config->get<std::string>("main_scene"), m_ecs);

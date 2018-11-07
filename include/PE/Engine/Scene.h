@@ -15,14 +15,14 @@ namespace PE::Engine {
 
     class Scene {
     public:
-        explicit Scene(const std::string & path, std::shared_ptr<ECS::ECS>);
+        explicit Scene(const std::string & path, std::shared_ptr<ECS::Manager>);
         virtual ~Scene();
 
     private:
         void makeEntity(YAML::Node);
 
         std::vector<ECS::Entity> m_entities;
-        std::shared_ptr<ECS::ECS> m_ecs;
+        std::shared_ptr<ECS::Manager> m_ecs;
         Properites m_properies;
     };
 
