@@ -6,9 +6,10 @@ set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/${DIR})
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
+        ${INCROOT}/Resource.h
         ${INCROOT}/ResourceManager.h
         ${SRCROOT}/ResourceManager.cpp
-        ${INCROOT}/Utils.h
+        ${INCROOT}/Defines.h
         ${INCROOT}/ResourcePool.h
         ${INCROOT}/ResourceHandle.h
         ${SRCROOT}/ResourceHandle.cpp

@@ -6,10 +6,11 @@
 #include <yaml-cpp/yaml.h>
 
 #include "PE/Utils/Utils.h"
+#include "PE/Resource/Resource.h"
 
 namespace PE::Engine {
 
-    class Properites {
+    class Properites : public Resource::LoadableResource {
     public:
         explicit Properites(const std::string & path);
         Properites();

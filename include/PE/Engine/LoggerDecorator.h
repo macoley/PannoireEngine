@@ -10,8 +10,8 @@ namespace PE::Engine {
     {
     public:
         template <typename ... Args>
-        LoggerDecorator(const std::string& id, Args &&... args)
-                : m_id(id),
+        LoggerDecorator(std::string id, Args &&... args)
+                : m_id(std::move(id)),
                   T(std::forward<Args>(args)...)
         {
             Utils::log("Resource loaded: ""\"" + m_id + "\"");

@@ -7,90 +7,70 @@
 
 namespace PE::Resource {
 
+    template<typename Resource>
+    class ResourcePool;
+
     /**
      * Resource Handle
      * @tparam Resource
      */
     template<typename Resource>
     class ResourceHandle {
-        using handleType = ResourceHandle<Resource>;
-        using resourcePoolType = ResourcePool<Resource>;
+        using Handle = ResourceHandle<Resource>;
+        using PoolPtr = std::shared_ptr<ResourcePool<Resource>>;
 
     public:
-
-        /**
-        * Reference Counter
-        */
-        class RefCounter {
-        public:
-            RefCounter() : m_counter(1) {}
-
-            void increase() { ++m_counter; }
-
-            void decrease() { --m_counter; }
-
-            uint32_t getCount() { return m_counter; }
-
-        private:
-            uint32_t m_counter;
-        };
-
-
-        ResourceHandle(resourcePoolType *pool, resourceIndex resource)
-                : m_resource(resource), m_pool(pool), m_counter(new RefCounter) {}
-
-        ~ResourceHandle() { decRef(); }
-
-        ResourceHandle(const ResourceHandle<Resource> &obj) {
-            addRef(obj);
+        ResourceHandle(ResourceIndex index, PoolPtr pool)
+                : m_index(index),
+                  m_pool(pool)
+        {
+            pool->incrementCounter(index);
         }
 
-        handleType& operator=(handleType &obj) {
-            if (this != &obj) {
-                if (m_resource != obj.m_resource) {
-                    decRef();
-                    addRef(obj);
-                }
+        virtual ~ResourceHandle() {
+            m_pool->decrementCounter(m_index);
+        }
+
+        // Copy Constructor
+        ResourceHandle(const ResourceHandle<Resource> &other)
+                : m_index(other.m_index),
+                  m_pool(other.m_pool)
+        {
+            m_pool->incrementCounter(m_index);
+        }
+
+        ResourceHandle<Resource>& operator=(const ResourceHandle<Resource>& other)
+        {
+            if (this != &other)
+            {
+                // decrement old one
+                m_pool->decrementCounter(m_index);
+
+                m_index = other.m_index;
+                m_pool = other.m_pool; // pool independent
+
+                // increment new one
+                m_pool->incrementCounter(m_index);
             }
 
             return *this;
         }
 
-        Resource& get() {
-            return m_pool->get(m_resource);
-        }
-
-        uint32_t getRefCount() {
-            return m_counter->getCount();
+        Resource& operator*() {
+            return *(m_pool->get(m_index));
         }
 
         Resource* operator->() {
-            return &m_pool->get(m_resource);
+            return m_pool->get(m_index);
+        }
+
+        std::size_t getRefCount() const {
+            return m_pool->getCount(m_index);
         }
 
     private:
-        void decRef() {
-            m_counter->decrease();
-
-            if (m_counter->getCount() == 0) {
-                delete m_counter;
-                release();
-            }
-        }
-
-        void addRef(const handleType &obj) {
-            m_counter = obj.m_counter;
-            m_counter->increase();
-            m_resource = obj.m_resource;
-        }
-
-        void release() {
-            m_pool->destroyResource(m_resource);
-        }
-
-        resourcePoolType *m_pool;
-        resourceIndex m_resource;
-        RefCounter *m_counter;
+        ResourceIndex m_index;
+        PoolPtr m_pool;
     };
 
 }

@@ -1,47 +1,55 @@
 #include <gtest/gtest.h>
 
+#include "PE/Utils/Utils.h"
+#include "PE/Resource/Resource.h"
 #include "PE/Resource/ResourceManager.h"
-#include "PE/Render/Texture.h"
-#include "PE/Render/Shader.h"
-#include "PE/Engine/Properties.h"
 
 using namespace PE;
+
+struct TestRes : public Resource::LoadableResource {
+    TestRes() {
+        Utils::log("Created new");
+    }
+
+    virtual ~TestRes() {
+        Utils::log("Removed");
+    }
+
+    void load(const std::string & path) override {
+        Utils::log("Loaded: " + path);
+    };
+};
 
 TEST(testResource, initTest) {
     auto res_manager = std::make_unique<Resource::ResourceManager>();
 
-    EXPECT_EQ(0, res_manager->getResourceAmount<Render::Texture>());
+    auto res = res_manager->load<TestRes>("somepath.jpg");
+    EXPECT_EQ(1, res.getRefCount());
+    EXPECT_EQ(1, res_manager->getSize<TestRes>());
 
     {
-        auto texture = res_manager->load<Render::Texture>("container.jpg");
-        EXPECT_EQ(1, texture.getRefCount());
-        EXPECT_EQ(1, res_manager->getResourceAmount<Render::Texture>());
+        auto res2 = res;
+
+        EXPECT_EQ(2, res.getRefCount());
+        EXPECT_EQ(1, res_manager->getSize<TestRes>());
+
         {
-            auto texture2 = texture;
-            EXPECT_EQ(2, texture2.getRefCount());
-            EXPECT_EQ(2, texture.getRefCount());
+            auto res3 = res_manager->load<TestRes>("somepath.jpg");
+            EXPECT_EQ(1, res_manager->getSize<TestRes>());
 
-            EXPECT_EQ(1, res_manager->getResourceAmount<Render::Texture>());
+            auto res4 = res_manager->load<TestRes>("somepathother.jpg");
+            EXPECT_EQ(2, res_manager->getSize<TestRes>());
         }
-        EXPECT_EQ(1, texture.getRefCount());
-
-        EXPECT_EQ(1, res_manager->getResourceAmount<Render::Texture>());
     }
 
-    EXPECT_EQ(0, res_manager->getResourceAmount<Render::Texture>());
-
+    EXPECT_EQ(1, res_manager->getSize<TestRes>());
+    EXPECT_EQ(1, res.getRefCount());
 }
 
-TEST(testResource, propertiesTest) {
-    auto res_manager = std::make_unique<Resource::ResourceManager>();
-
-    auto config = res_manager->load<Engine::Properites>();
-    config.get().set("width", 450);
-    config.get().set("height", 100);
-    config.get().save("config.yml");
-}
 
 int main(int argc, char **argv) {
+    Utils::Locator::provide(new Utils::ConsoleLogger());
+
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

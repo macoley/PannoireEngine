@@ -10,10 +10,10 @@
 #include <type_traits>
 #include <memory>
 
+#include "ResourcePool.h"
+#include "ResourceHandle.h"
+
 #include "PE/Utils/Utils.h"
-#include "PE/Resource/Utils.h"
-#include "PE/Resource/ResourcePool.h"
-#include "PE/Resource/ResourceHandle.h"
 
 namespace PE::Resource {
 
@@ -21,7 +21,7 @@ namespace PE::Resource {
      * Resource manager
      */
     class ResourceManager {
-        using PoolPtr = std::unique_ptr<BaseResourcePool>;
+        using PoolPtr = std::shared_ptr<BaseResourcePool>;
 
     public:
         ResourceManager() = default;
@@ -29,17 +29,14 @@ namespace PE::Resource {
         virtual ~ResourceManager() = default;
 
         template<typename Resource, typename ... Args>
-        ResourceHandle<Resource> load(Args &&... args);
+        ResourceHandle<Resource> create(Args &&... args);
+
+        template<typename Resource, typename ... Args>
+        ResourceHandle<Resource> load(const std::string &&path, Args &&... args);
 
         template<typename Resource>
-        std::size_t getResourceAmount();
-
+        std::size_t getSize() const;
     private:
-        template<typename Resource>
-        void createPool();
-
-        std::vector<PoolPtr> m_pools;
-
         /**
          * Base Resource Counter
          */
@@ -59,6 +56,12 @@ namespace PE::Resource {
         public:
             static FamilyIndex getFamily();
         };
+
+
+        template<typename Resource>
+        void createPool();
+
+        std::vector<PoolPtr> m_pools;
     };
 
 
@@ -85,46 +88,55 @@ namespace PE::Resource {
             m_pools.resize(index);
         }
 
-        m_pools.emplace(m_pools.begin() + index, static_cast<BaseResourcePool *>(new ResourcePool<Resource>()));
+        m_pools.emplace(m_pools.begin() + index, new ResourcePool<Resource>());
     }
 
     /**
-     * Load
+     * Create Resource
      * @tparam Resource
      * @tparam Args
      * @param args
      * @return
      */
-    template<typename Resource, typename ... Args>
-    ResourceHandle<Resource> ResourceManager::load(Args &&... args) {
+    template<typename Resource, typename... Args>
+    ResourceHandle<Resource> ResourceManager::create(Args &&... args) {
         auto index = ResourceCounter<Resource>::getFamily();
 
         if (index >= m_pools.size()) {
             createPool<Resource>();
         }
 
-        auto pool = static_cast<ResourcePool<Resource> *>(m_pools[index].get());
-        auto resourceIndex = pool->createResource(std::forward<Args>(args)...);
-
-        return {pool, resourceIndex};
+        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
+                ->createResource(std::forward<Args>(args) ...);
     }
 
     /**
-     * Get resource amount
+     * Load resource
      * @tparam Resource
+     * @tparam Args
+     * @param path
+     * @param args
      * @return
      */
-    template<typename Resource>
-    std::size_t ResourceManager::getResourceAmount() {
+    template<typename Resource, typename... Args>
+    ResourceHandle<Resource> ResourceManager::load(const std::string &&path, Args &&... args) {
         auto index = ResourceCounter<Resource>::getFamily();
 
         if (index >= m_pools.size()) {
-            return 0;
+            createPool<Resource>();
         }
 
-        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())->getResourceAmount();
+        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
+                ->loadResource(std::forward<const std::string>(path), std::forward<Args>(args) ...);
     }
 
+    template<typename Resource>
+    std::size_t ResourceManager::getSize() const {
+        auto index = ResourceCounter<Resource>::getFamily();
+
+        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
+                ->getSize();
+    }
 
 }
 
