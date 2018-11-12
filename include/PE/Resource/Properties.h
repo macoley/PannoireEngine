@@ -1,20 +1,19 @@
-#ifndef PANNOIREENGINE_PROPERTIES_H
-#define PANNOIREENGINE_PROPERTIES_H
+#ifndef PE_RES_PROPERTIES_H
+#define PE_RES_PROPERTIES_H
 
 #include <fstream>
 
 #include <yaml-cpp/yaml.h>
 
+#include "Resource.h"
 #include "PE/Utils/Utils.h"
-#include "PE/Resource/Resource.h"
 
-namespace PE::Engine {
+namespace PE::Resource {
 
-    class Properites : public Resource::LoadableResource {
+    class Properties : public IResource {
     public:
-        explicit Properites(const std::string & path);
-        Properites();
-        virtual ~Properites();
+        Properties() = default;
+        virtual ~Properties() = default;
 
         void load(const std::string & path);
         void save(const std::string & path);
@@ -27,18 +26,18 @@ namespace PE::Engine {
 
     private:
         std::string m_path;
-        YAML::Node m_root;
+        YAML::Node m_root{};
     };
 
     template<typename T>
-    T Properites::get(const std::string &key) const {
+    T Properties::get(const std::string &key) const {
         return m_root[key].as<T>();
     }
 
     template<typename T>
-    void Properites::set(const std::string &key, const T &value) {
+    void Properties::set(const std::string &key, const T &value) {
         m_root[key] = value;
     }
 }
 
-#endif //PANNOIREENGINE_PROPERTIES_H
+#endif //PE_RES_PROPERTIES_H

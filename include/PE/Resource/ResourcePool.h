@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 #include "Defines.h"
-#include "Resource.h"
+#include "IResource.h"
 #include "ResourceHandle.h"
 
 namespace PE::Resource {
@@ -65,7 +65,7 @@ namespace PE::Resource {
         Handle createResource(Args &&... args);
 
         template<typename... Args>
-        Handle loadResource(const std::string &&path, Args &&... args);
+        Handle loadResource(const std::string &path, Args &&... args);
 
         void incrementCounter(ResourceIndex);
 
@@ -86,9 +86,10 @@ namespace PE::Resource {
         std::unordered_map<std::string, ResourceIndex> m_cache;
         std::unordered_map<ResourceIndex, std::string> m_reverse_cache;
 
-        std::vector<CounterPtr> m_counters;
+        std::vector<CounterPtr> m_counters; // todo std::pair
         std::vector<ResourcePtr> m_pool;
         std::stack<ResourceIndex> m_free_indexes;
+        // todo proxy
     };
 
 
@@ -113,8 +114,8 @@ namespace PE::Resource {
 
     template<typename Resource>
     template<typename... Args>
-    typename ResourcePool<Resource>::Handle ResourcePool<Resource>::loadResource(const std::string &&path, Args &&... args) {
-        static_assert(std::is_base_of<LoadableResource, Resource>::value, "Resource must be inherited from LoadableResource");
+    typename ResourcePool<Resource>::Handle ResourcePool<Resource>::loadResource(const std::string &path, Args &&... args) {
+        static_assert(std::is_base_of<IResource, Resource>::value, "Resource must be inherited from LoadableResource");
 
         auto search = m_cache.find(path);
 
@@ -129,7 +130,7 @@ namespace PE::Resource {
             m_cache[path] = index;
             m_reverse_cache[index] = path;
 
-            m_pool[index]->load(std::forward<const std::string>(path));
+            m_pool[index]->load(path);
 
             return {index, this->shared_from_this()};
         }

@@ -1,18 +1,14 @@
 
+#include <PE/Engine/Scene.h>
+
 #include "PE/Engine/Scene.h"
 
 namespace PE::Engine {
 
-    /**
-     * Scene Constructor
-     * @param path
-     * @param ecs
-     */
-    Scene::Scene(const std::string &path, std::shared_ptr<ECS::Manager> ecs)
-        : m_properies(path),
-          m_ecs(std::move(ecs))
-    {
-        auto entitiesNode = m_properies.get<YAML::Node>("entities");
+    void Scene::load(const std::string &path) {
+        m_properties = m_manager->load<Resource::Properties>(path);
+
+        auto entitiesNode = m_properties->get<YAML::Node>("entities");
 
         for (std::size_t i = 0; i < entitiesNode.size(); i++) {
             makeEntity(entitiesNode[i]);
@@ -52,5 +48,9 @@ namespace PE::Engine {
 
         m_entities.push_back(entity);
     }
+
+
+
+
 
 }

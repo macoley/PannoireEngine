@@ -1,19 +1,17 @@
 
+#include <PE/Render/Shader.h>
+
 #include "PE/Render/Shader.h"
 
 namespace PE::Render {
 
-    Shader::Shader(const std::string & pathVertex, const std::string & pathFragment) {
-        compileShaders(loadSource(pathVertex), loadSource(pathFragment));
-    }
-
-
-    Shader::~Shader() {
-        glDeleteProgram(shaderProgramID);
-    }
-
-    std::string Shader::loadSource(const std::string & path) {
-        std::string shader;
+    /**
+     * Helper function
+     * @param path
+     * @return
+     */
+    std::string loadSource(const std::string &path) {
+        std::string source;
         std::ifstream file;
         file.exceptions (std::ifstream::failbit | std::ifstream::badbit);
 
@@ -24,78 +22,124 @@ namespace PE::Render {
             stream << file.rdbuf();
             file.close();
 
-            shader = stream.str();
+            source = stream.str();
         }
         catch (const std::ifstream::failure & e)
         {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+            Utils::logError("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ");
         }
 
-        return shader;
+        return source;
     }
 
-    void Shader::compileShaders(const std::string &vertexSource, const std::string &fragmentSource) {
-        // Temp vars
-        uint32_t vertexShaderID, fragmentShaderID;
 
+    /**
+     * Shader Compile
+     * @param vertexShaderID
+     * @param fragmentShaderID
+     */
+    void Shader::compile(ProgramID vertexShaderID, ProgramID fragmentShaderID) {
+        int  success;
+        char infoLog[512];
+
+        /**
+         * Compile entire Shader Program
+         */
+        m_shaderProgramID = glCreateProgram();
+
+        glAttachShader(m_shaderProgramID, vertexShaderID);
+        glAttachShader(m_shaderProgramID, fragmentShaderID);
+        glLinkProgram(m_shaderProgramID);
+
+        // get results
+        glGetProgramiv(m_shaderProgramID, GL_LINK_STATUS, &success);
+
+        if(!success) {
+            glGetProgramInfoLog(m_shaderProgramID, 512, NULL, infoLog);
+
+            Utils::logError("ERROR::SHADER::PROGRAM::LINK_FAILED " + std::string(infoLog));
+        }
+    }
+
+    Shader::~Shader() {
+        glDeleteProgram(m_shaderProgramID);
+    }
+
+    void Shader::load(const std::string &path) {
+        auto properties = m_manager->load<Resource::Properties>(path);
+
+        auto vertex = m_manager->load<VertexShader>(properties->get<std::string>("vertex_shader"));
+        auto fragment = m_manager->load<FragmentShader>(properties->get<std::string>("fragment_shader"));
+
+        compile(vertex->getID(), fragment->getID());
+    }
+
+    /**
+     * Vertex Shader load
+     * @param path
+     */
+    void VertexShader::load(const std::string &path) {
+        compile(loadSource(path));
+    }
+
+    void VertexShader::compile(const std::string &source) {
         int  success;
         char infoLog[512];
 
         /**
          * Vertex Shader
          */
-        const char * vertexShaderSource = vertexSource.c_str();
-        vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+        const char * vertexShaderSource = source.c_str();
+        m_vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 
-        glShaderSource(vertexShaderID, 1, &vertexShaderSource, NULL);
-        glCompileShader(vertexShaderID);
+        glShaderSource(m_vertexShaderID, 1, &vertexShaderSource, NULL);
+        glCompileShader(m_vertexShaderID);
 
         // get results
-        glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &success);
+        glGetShaderiv(m_vertexShaderID, GL_COMPILE_STATUS, &success);
+
         if(!success)
         {
-            glGetShaderInfoLog(vertexShaderID, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl; // Todo logger
+            glGetShaderInfoLog(m_vertexShaderID, 512, NULL, infoLog);
+
+            Utils::logError("ERROR::SHADER::VERTEX::COMPILATION_FAILED " + std::string(infoLog));
         }
-
-
-        /**
-         * Fragment Shader
-         */
-        const char * fragmentShaderSource = fragmentSource.c_str();
-        fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-        glShaderSource(fragmentShaderID, 1, &fragmentShaderSource, NULL);
-        glCompileShader(fragmentShaderID);
-
-        // get results
-        glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &success);
-        if(!success)
-        {
-            glGetShaderInfoLog(fragmentShaderID, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl; // Todo logger
-        }
-
-        /**
-         * Compile entire Shader Program
-         */
-        shaderProgramID = glCreateProgram();
-
-        glAttachShader(shaderProgramID, vertexShaderID);
-        glAttachShader(shaderProgramID, fragmentShaderID);
-        glLinkProgram(shaderProgramID);
-
-        // get results
-        glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &success);
-        if(!success) {
-            glGetProgramInfoLog(shaderProgramID, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl; // Todo logger
-        }
-
-
-        // Clear Vertex and fragment shader
-        glDeleteShader(vertexShaderID);
-        glDeleteShader(fragmentShaderID);
     }
 
+    VertexShader::~VertexShader() {
+        glDeleteShader(m_vertexShaderID);
+    }
+
+    /**
+     * Fragment Shader load
+     * @param path
+     */
+    void FragmentShader::load(const std::string &path) {
+        compile(loadSource(path));
+    }
+
+    void FragmentShader::compile(const std::string &source) {
+        int  success;
+        char infoLog[512];
+
+        const char * fragmentShaderSource = source.c_str();
+        m_fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+        glShaderSource(m_fragmentShaderID, 1, &fragmentShaderSource, NULL);
+        glCompileShader(m_fragmentShaderID);
+
+        // get results
+        glGetShaderiv(m_fragmentShaderID, GL_COMPILE_STATUS, &success);
+
+        if(!success)
+        {
+            glGetShaderInfoLog(m_fragmentShaderID, 512, NULL, infoLog);
+
+            Utils::logError("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED " + std::string(infoLog));
+        }
+    }
+
+    FragmentShader::~FragmentShader() {
+        glDeleteShader(m_fragmentShaderID);
+    }
 }

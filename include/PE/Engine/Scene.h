@@ -8,22 +8,38 @@
 
 #include "PE/ECS/ECS.h"
 #include "PE/Utils/Utils.h"
-#include "Properties.h"
+#include "PE/Resource/Resource.h"
+#include "PE/Resource/Properties.h"
+
 #include "Component.h"
 
 namespace PE::Engine {
 
-    class Scene {
+    class Scene : public Resource::IResource {
+        using PropertiesHandle = Resource::ResourceHandle<Resource::Properties>;
+
+        using ResManagerPtr = std::shared_ptr<Resource::ResourceManager>;
+        using ECSPtr = std::shared_ptr<ECS::Manager>;
+
     public:
-        explicit Scene(const std::string & path, std::shared_ptr<ECS::Manager>);
+        explicit Scene(ResManagerPtr manager, ECSPtr ecs)
+                : m_ecs(std::move(ecs)),
+                  m_manager(std::move(manager))
+        {}
+
+        Scene() = delete;
         virtual ~Scene();
+
+        void load(const std::string& path) override;
 
     private:
         void makeEntity(YAML::Node);
 
         std::vector<ECS::Entity> m_entities;
-        std::shared_ptr<ECS::Manager> m_ecs;
-        Properites m_properies;
+        ECSPtr m_ecs;
+        ResManagerPtr m_manager;
+
+        PropertiesHandle m_properties;
     };
 
 

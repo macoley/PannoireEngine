@@ -5,7 +5,7 @@ namespace PE::Engine {
 
     Core::Core()
             : m_ecs(ECS::MakeECS()),
-              m_res_manager(new Resource::ResourceManager)
+              m_res_manager(Resource::MakeManager())
     {}
 
     void Core::init() {
@@ -14,9 +14,9 @@ namespace PE::Engine {
         Utils::log("Core initializing");
 
         // APP CONFIG
-        auto config = m_res_manager->load<Engine::Properites>("config.yml");
+        auto config = m_res_manager->load<Resource::Properties>("config.yml");
 
-        /*
+
         // RENDERER SYSTEM
         Render::init();
         m_context = std::shared_ptr<Render::Context>(
@@ -28,17 +28,15 @@ namespace PE::Engine {
         );
 
         // RESOURCE MANAGER
-        auto texture = m_res_manager->load<LoggerDecorator<Render::Texture>>("Container texture", "container.jpg");
+        auto texture = m_res_manager->load<Render::Texture>("container.jpg");
+
         // todo one shader manifest, two shader classes
-        auto shader = m_res_manager->load<LoggerDecorator<Render::Shader>>("Shader basic", "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+        auto shader = m_res_manager->load<Render::Shader>("shader.yml", m_res_manager);
 
         // MAIN SCENE
-        // todo lambda
-        auto scene = m_res_manager->load<LoggerDecorator<Engine::Scene>>("Main scene", config->get<std::string>("main_scene"), m_ecs);
+        auto scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
 
         initLoop();
-
-        */
     }
 
     /**

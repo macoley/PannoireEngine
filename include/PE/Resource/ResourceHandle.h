@@ -1,5 +1,5 @@
-#ifndef PANNOIREENGINE_RESOURCEHANDLE_H
-#define PANNOIREENGINE_RESOURCEHANDLE_H
+#ifndef PE_RES_RESOURCEHANDLE_H
+#define PE_RES_RESOURCEHANDLE_H
 
 #include <cstdint>
 
@@ -20,59 +20,76 @@ namespace PE::Resource {
         using PoolPtr = std::shared_ptr<ResourcePool<Resource>>;
 
     public:
+        ResourceHandle() = default;
+
         ResourceHandle(ResourceIndex index, PoolPtr pool)
                 : m_index(index),
-                  m_pool(pool)
-        {
-            pool->incrementCounter(index);
+                  m_pool(pool),
+                  m_weak(false) {
+            increment();
         }
 
         virtual ~ResourceHandle() {
-            m_pool->decrementCounter(m_index);
+            decrement();
         }
 
         // Copy Constructor
         ResourceHandle(const ResourceHandle<Resource> &other)
                 : m_index(other.m_index),
-                  m_pool(other.m_pool)
-        {
-            m_pool->incrementCounter(m_index);
+                  m_pool(other.m_pool),
+                  m_weak(other.m_weak) {
+            increment();
         }
 
-        ResourceHandle<Resource>& operator=(const ResourceHandle<Resource>& other)
-        {
-            if (this != &other)
-            {
+        ResourceHandle<Resource> &operator=(const ResourceHandle<Resource> &other) {
+            if (this != &other) {
                 // decrement old one
-                m_pool->decrementCounter(m_index);
+                decrement();
 
                 m_index = other.m_index;
                 m_pool = other.m_pool; // pool independent
+                m_weak = other.m_weak;
 
                 // increment new one
-                m_pool->incrementCounter(m_index);
+                increment();
             }
 
             return *this;
         }
 
-        Resource& operator*() {
+        Resource &operator*() {
+            assert(!m_weak);
             return *(m_pool->get(m_index));
         }
 
-        Resource* operator->() {
+        Resource *operator->() {
+            assert(!m_weak);
             return m_pool->get(m_index);
         }
 
         std::size_t getRefCount() const {
+            assert(!m_weak);
             return m_pool->getCount(m_index);
         }
 
     private:
-        ResourceIndex m_index;
-        PoolPtr m_pool;
+        inline void increment() {
+            if (!m_weak) {
+                m_pool->incrementCounter(m_index);
+            }
+        }
+
+        inline void decrement() {
+            if (!m_weak) {
+                m_pool->decrementCounter(m_index);
+            }
+        }
+
+        bool m_weak{true};
+        ResourceIndex m_index{0};
+        PoolPtr m_pool{nullptr};
     };
 
 }
 
-#endif //PANNOIREENGINE_RESOURCEHANDLE_H
+#endif //PE_RES_RESOURCEHANDLE_H

@@ -1,18 +1,13 @@
-#ifndef PANNOIREENGINE_RESOURCE_H
-#define PANNOIREENGINE_RESOURCE_H
+#ifndef PE_RES_RESOURCE_H
+#define PE_RES_RESOURCE_H
 
-#include <string>
+#include "ResourceManager.h"
+#include "IResource.h"
 
 namespace PE::Resource {
 
-    class LoadableResource {
-    public:
-        LoadableResource() = default;
-        virtual ~LoadableResource() = default;
-
-        virtual void load(const std::string & path) = 0;
-    };
+    std::shared_ptr<ResourceManager> MakeManager();
 
 }
 
-#endif //PANNOIREENGINE_RESOURCE_H
+#endif //PE_RES_RESOURCE_H

@@ -1,7 +1,9 @@
+
+#include <PE/Render/Texture.h>
+
 #include "PE/Render/Texture.h"
 
 namespace PE::Render {
-
 
     void Texture::loadImageFromFile(const std::string &path) {
         unsigned char* data;
@@ -9,10 +11,9 @@ namespace PE::Render {
         data = stbi_load(path.c_str(), &m_width, &m_height, &m_components, 0);
 
         if (!data) {
-            std::cout << "Texture failed to load at path: " << path << std::endl;
+            Utils::log("Texture failed to load at path: " + path);
         }
 
-#if !DEBUG_RESOURCE
         // Generate texture
         glGenTextures(1, &m_id);
 
@@ -37,18 +38,15 @@ namespace PE::Render {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-#endif
 
         stbi_image_free(data);
     }
 
-    Texture::Texture(const std::string &path) {
-        loadImageFromFile(path);
+    Texture::~Texture() {
+        glDeleteTextures(1, &m_id);
     }
 
-    Texture::~Texture() {
-#if !DEBUG_RESOURCE
-        glDeleteTextures(1, &m_id);
-#endif
+    void Texture::load(const std::string &path) {
+        loadImageFromFile(path);
     }
 }

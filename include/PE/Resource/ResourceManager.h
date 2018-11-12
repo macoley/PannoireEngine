@@ -1,5 +1,5 @@
-#ifndef PANNOIREENGINE_RESOURCEMANAGER_H
-#define PANNOIREENGINE_RESOURCEMANAGER_H
+#ifndef PE_RES_RESOURCEMANAGER_H
+#define PE_RES_RESOURCEMANAGER_H
 
 #include <vector>
 #include <string>
@@ -32,7 +32,7 @@ namespace PE::Resource {
         ResourceHandle<Resource> create(Args &&... args);
 
         template<typename Resource, typename ... Args>
-        ResourceHandle<Resource> load(const std::string &&path, Args &&... args);
+        ResourceHandle<Resource> load(const std::string &path, Args &&... args);
 
         template<typename Resource>
         std::size_t getSize() const;
@@ -119,7 +119,7 @@ namespace PE::Resource {
      * @return
      */
     template<typename Resource, typename... Args>
-    ResourceHandle<Resource> ResourceManager::load(const std::string &&path, Args &&... args) {
+    ResourceHandle<Resource> ResourceManager::load(const std::string &path, Args &&... args) {
         auto index = ResourceCounter<Resource>::getFamily();
 
         if (index >= m_pools.size()) {
@@ -127,7 +127,7 @@ namespace PE::Resource {
         }
 
         return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
-                ->loadResource(std::forward<const std::string>(path), std::forward<Args>(args) ...);
+                ->loadResource(path, std::forward<Args>(args) ...);
     }
 
     template<typename Resource>
@@ -140,4 +140,4 @@ namespace PE::Resource {
 
 }
 
-#endif //PANNOIREENGINE_RESOURCEMANAGER_H
+#endif //PE_RES_RESOURCEMANAGER_H

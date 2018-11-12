@@ -10,14 +10,17 @@
 #include <gsl/gsl>
 #include <stb_image.h>
 
-#define DEBUG_RESOURCE true
+#include "PE/Resource/Resource.h"
+#include "PE/Utils/Utils.h"
 
 namespace PE::Render {
 
-    class Texture {
+    class Texture : public Resource::IResource {
     public:
-        explicit Texture(const std::string & path);
+        explicit Texture() = default;
         virtual ~Texture();
+
+        void load(const std::string & path) override;
 
     private:
         void loadImageFromFile(const std::string& path);

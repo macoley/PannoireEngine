@@ -5,14 +5,15 @@
 #include <iostream>
 
 #include "PE/ECS/ECS.h"
-#include "PE/Resource/ResourceManager.h"
+#include "PE/Resource/Resource.h"
 #include "PE/Render/Render.h"
 #include "PE/Utils/Utils.h"
 
 #include "PE/Render/Texture.h"
 #include "PE/Render/Shader.h"
 
-#include "Properties.h"
+#include "PE/Resource/Properties.h"
+
 #include "Scene.h"
 #include "LoggerDecorator.h"
 #include "Component.h"

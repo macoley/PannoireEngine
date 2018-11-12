@@ -2,11 +2,10 @@
 
 #include "PE/Utils/Utils.h"
 #include "PE/Resource/Resource.h"
-#include "PE/Resource/ResourceManager.h"
 
 using namespace PE;
 
-struct TestRes : public Resource::LoadableResource {
+struct TestRes : public Resource::IResource {
     TestRes() {
         Utils::log("Created new");
     }
@@ -21,7 +20,7 @@ struct TestRes : public Resource::LoadableResource {
 };
 
 TEST(testResource, initTest) {
-    auto res_manager = std::make_unique<Resource::ResourceManager>();
+    auto res_manager = Resource::MakeManager();
 
     auto res = res_manager->load<TestRes>("somepath.jpg");
     EXPECT_EQ(1, res.getRefCount());
