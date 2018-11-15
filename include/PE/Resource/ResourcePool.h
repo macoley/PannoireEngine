@@ -147,7 +147,6 @@ namespace PE::Resource {
      */
     template<typename Resource>
     void ResourcePool<Resource>::destroyResource(ResourceIndex proxy_index) {
-
         auto proxy_last_index = m_proxy_reverse.back();
         auto proxy_reverse_element_index = m_proxy[proxy_index];
 

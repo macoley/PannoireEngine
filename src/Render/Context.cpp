@@ -1,3 +1,6 @@
+
+#include <PE/Render/Context.h>
+
 #include "PE/Render/Context.h"
 
 namespace PE::Render {
@@ -31,7 +34,7 @@ namespace PE::Render {
      * @param width
      * @param height
      */
-    Context::Context(const std::string & title, uint32_t width, uint32_t height)
+    Context::Context(const std::string & title, uint32_t width, uint32_t height) : m_width(width), m_height(height)
     {
         Utils::log("Context creating...");
 
@@ -89,12 +92,27 @@ namespace PE::Render {
         glfwPollEvents();
     }
 
-    void Context::swapBuffers() {
+    void Context::render(Context::RenderFunction fnc) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        fnc();
+
         glfwSwapBuffers(m_window);
     }
 
-    void Context::clear() {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    void Context::configCamera(Shader &shader, Camera *camera) {
+        shader.use();
+
+        m_projection = glm::perspective(glm::radians(camera->getFov()), (float)m_width / (float)m_height, 0.1f, 100.0f);
+
+        shader.set("projection", m_projection);
+        shader.set("view", camera->getView());
+
+        // render the loaded model
+        glm::mat4 m_temp_model;
+        m_temp_model = glm::translate(m_temp_model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+        m_temp_model = glm::scale(m_temp_model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+        shader.set("model", m_temp_model);
     }
 }

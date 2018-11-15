@@ -90,39 +90,39 @@ namespace PE::Render {
         /*
          * SETTERS
          */
-        template<typename T>
-        void set(const std::string &name, T value)
-        {}
-
-        void set(const std::string &name, bool value)
+        inline void set(const std::string &name, bool value) const
         {
             glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), (int) value);
         }
 
-        void set(const std::string &name, int value)
+        inline void set(const std::string &name, int value) const
         {
             glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
         }
 
-        void set(const std::string &name, float value)
+        inline void set(const std::string &name, float value) const
         {
             glUniform1f(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
         }
 
-        void set(const std::string &name, const glm::mat4 &matrix)
+        inline void set(const std::string &name, const glm::mat4 &matrix) const
         {
             glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
         }
 
-        void set(const std::string &name, glm::vec3 v)
+        inline void set(const std::string &name, glm::vec3 v) const
         {
             glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v.x, v.y, v.z);
         }
 
-        void set(const std::string &name, float v0, float v1, float v2)
+        inline void set(const std::string &name, float v0, float v1, float v2) const
         {
             glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v0, v1, v2);
         }
+
+        template<typename T>
+        inline void set(const std::string &name, T value) const
+        {}
 
     private:
         void compile(ProgramID vertexShaderID, ProgramID fragmentShaderID);

@@ -3,6 +3,10 @@
 
 namespace PE::Engine {
 
+    Resource::ResourceHandle<Render::Model> model;
+    Resource::ResourceHandle<Render::Shader> shader;
+    Render::Camera *camera;
+
     Core::Core()
             : m_ecs(ECS::MakeECS()),
               m_res_manager(Resource::MakeManager()) {}
@@ -28,13 +32,14 @@ namespace PE::Engine {
         auto texture = m_res_manager->load<Render::Texture>("container.jpg");
 
         // todo one shader manifest, two shader classes
-        auto shader = m_res_manager->load<Render::Shader>("shader.yml", m_res_manager);
+        shader = m_res_manager->load<Render::Shader>("shader.yml", m_res_manager);
 
         // MAIN SCENE
         auto scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
 
         // Model
-        auto model = m_res_manager->load<Render::Model>("res/ForestScene.obj", m_res_manager);
+        model = m_res_manager->load<Render::Model>("res/ForestScene.obj", m_res_manager);
+        camera = new Render::Camera({0.5f, 0.5f, 15.0f});
 
         initLoop();
     }
@@ -43,19 +48,22 @@ namespace PE::Engine {
      * Fixed update
      */
     void Core::fixedUpdate() {
-
+        m_context->processInput();
     }
 
     /**
      * Free update
      */
     void Core::update(double alpha) {
-        m_context->clear();
+        m_context->pollEvents();
 
         // For alpha I need to create transform old and new...
         //m_ecs->updateSystem<Render::RenderSystem>();
 
-        m_context->swapBuffers();
+        m_context->render([&]() {
+            m_context->configCamera(*shader, camera);
+            model->draw(*shader);
+        });
     }
 
     /**
@@ -77,6 +85,7 @@ namespace PE::Engine {
         while (m_context->isRunning()) {
             double newTime = m_context->getTime();
             double frameTime = newTime - currentTime;
+
             if (frameTime > 0.25)
                 frameTime = 0.25;
 
@@ -85,7 +94,6 @@ namespace PE::Engine {
 
             while (accumulator >= dt) {
                 // logic here
-                m_context->processInput();
                 fixedUpdate();
 
                 t += dt;
@@ -95,7 +103,6 @@ namespace PE::Engine {
             const double alpha = accumulator / dt;
 
             // render here
-            m_context->pollEvents();
             update(alpha);
         }
 
@@ -103,6 +110,10 @@ namespace PE::Engine {
 
     Core::~Core() {
         Utils::log("Engine turned off");
+
+        model.destroy();
+        shader.destroy();
+        delete camera;
     }
 
 }

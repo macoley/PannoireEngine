@@ -1,3 +1,6 @@
+
+#include <PE/Render/Camera.h>
+
 #include "PE/Render/Camera.h"
 
 namespace PE::Render {
@@ -13,6 +16,7 @@ namespace PE::Render {
               sensitivity(SENSIVITY)
     {
         calculateFront();
+        calculateView();
     }
 
     void Camera::move(Camera_Movement direction) {
@@ -30,6 +34,8 @@ namespace PE::Render {
             case RIGHT:
                 cameraPos += speed * glm::normalize(glm::cross(cameraFront, cameraUp));
         }
+
+        calculateView();
     }
 
     void Camera::rotate(float xoffset, float yoffset) {
@@ -46,6 +52,7 @@ namespace PE::Render {
             pitch = -89.0f;
 
         calculateFront();
+        calculateView();
     }
 
     void Camera::calculateFront() {
@@ -72,6 +79,10 @@ namespace PE::Render {
         {
             fov = 45.0f;
         }
+    }
+
+    void Camera::calculateView() {
+        m_view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     }
 
 }

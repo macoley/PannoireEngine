@@ -19,8 +19,8 @@ set(SRC
         ${SRCROOT}/Mesh.cpp
         ${INCROOT}/Model.h
         ${SRCROOT}/Model.cpp
-        #${INCROOT}/Camera.h
-        #${SRCROOT}/Camera.cpp
+        ${INCROOT}/Camera.h
+        ${SRCROOT}/Camera.cpp
         ${INCROOT}/Texture.h
         ${SRCROOT}/Texture.cpp
         )

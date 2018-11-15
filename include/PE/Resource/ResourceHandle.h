@@ -72,6 +72,13 @@ namespace PE::Resource {
             return m_pool->getCount(m_index);
         }
 
+        void destroy()
+        {
+            decrement();
+            m_weak = true;
+            m_pool.reset();
+        }
+
     private:
         inline void increment() {
             if (!m_weak) {

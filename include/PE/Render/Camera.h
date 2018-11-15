@@ -29,7 +29,7 @@ namespace PE::Render {
         void rotate(float xoffset, float yoffset);
 
         float getFov() { return fov; };
-        glm::mat4 getView() { return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp); };
+        const glm::mat4 &getView() { return m_view; };
         glm::vec3 getPos() { return cameraPos; };
 
     private:
@@ -44,6 +44,9 @@ namespace PE::Render {
         float sensitivity;
 
         void calculateFront();
+        void calculateView();
+
+        glm::mat4 m_view;
     };
 
 

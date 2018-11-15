@@ -11,9 +11,7 @@ namespace PE::Render {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-            //meshes.push_back({processMesh(mesh), processMaterial(material)});
-            m_meshes.push_back({{}, processMaterial(material)});
-            //test2.push_back(processMaterial(material));
+            m_meshes.push_back({processMesh(mesh), processMaterial(material)});
         }
 
         // then do the same for each of its children
@@ -137,8 +135,41 @@ namespace PE::Render {
      * Draw Model
      * @param t_shader
      */
-    void Model::draw(Shader &t_shader) {
+    void Model::draw(Shader &shader) {
+        std::for_each(m_meshes.begin(), m_meshes.end(), [&](MeshRender &m) {
+            shader.use(); // todo shader from material
 
+            // Textures (todo move to material class)
+            uint8_t i = 0, j;
+
+            j = 0;
+            for (TextureHandle &t : m.material.diffuseMaps) {
+                t->bindTexture(shader, "texture_diffuse_" + std::to_string(j++), i++);
+            }
+
+            j = 0;
+            for (TextureHandle &t : m.material.heightMaps) {
+                t->bindTexture(shader, "texture_height_" + std::to_string(j++), i++);
+            }
+
+            j = 0;
+            for (TextureHandle &t : m.material.normalMaps) {
+                t->bindTexture(shader, "texture_normal_" + std::to_string(j++), i++);
+            }
+
+            j = 0;
+            for (TextureHandle &t : m.material.opacityMaps) {
+                t->bindTexture(shader, "texture_opacity_" + std::to_string(j++), i++);
+            }
+
+            j = 0;
+            for (TextureHandle &t : m.material.specularMaps) {
+                t->bindTexture(shader, "texture_specular_" + std::to_string(j++), i++);
+            }
+
+            // Mesh render
+            m.mesh->draw(shader);
+        });
     }
 
     Model::~Model() {
