@@ -11,6 +11,7 @@
 
 #include "PE/Render/Texture.h"
 #include "PE/Render/Shader.h"
+#include "PE/Render/Model.h"
 
 #include "PE/Resource/Properties.h"
 

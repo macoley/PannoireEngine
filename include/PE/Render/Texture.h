@@ -8,7 +8,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <gsl/gsl>
-#include <stb_image.h>
 
 #include "PE/Resource/Resource.h"
 #include "PE/Utils/Utils.h"
@@ -25,10 +24,10 @@ namespace PE::Render {
     private:
         void loadImageFromFile(const std::string& path);
 
-        uint32_t m_id; //GLuint is 32bit
-        int32_t m_width;
-        int32_t m_height;
-        int32_t m_components;
+        uint32_t m_id{0}; //GLuint is 32bit
+        int32_t m_width{0};
+        int32_t m_height{0};
+        int32_t m_components{3};
     };
 
 

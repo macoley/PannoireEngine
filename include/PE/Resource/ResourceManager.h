@@ -130,6 +130,11 @@ namespace PE::Resource {
                 ->loadResource(path, std::forward<Args>(args) ...);
     }
 
+    /**
+     * Get Size
+     * @tparam Resource
+     * @return
+     */
     template<typename Resource>
     std::size_t ResourceManager::getSize() const {
         auto index = ResourceCounter<Resource>::getFamily();

@@ -6,6 +6,7 @@ set(INCROOT ${PROJECT_SOURCE_DIR}/include/PE/${DIR})
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
+        ${INCROOT}/Defines.h
         ${INCROOT}/Render.h
         ${SRCROOT}/Render.cpp
         #${INCROOT}/RenderSystem.h
@@ -14,10 +15,10 @@ set(SRC
         ${SRCROOT}/Context.cpp
         ${INCROOT}/Shader.h
         ${SRCROOT}/Shader.cpp
-        #${INCROOT}/Mesh.h
-        #${SRCROOT}/Mesh.cpp
-        #${INCROOT}/Model.h
-        #${SRCROOT}/Model.cpp
+        ${INCROOT}/Mesh.h
+        ${SRCROOT}/Mesh.cpp
+        ${INCROOT}/Model.h
+        ${SRCROOT}/Model.cpp
         #${INCROOT}/Camera.h
         #${SRCROOT}/Camera.cpp
         ${INCROOT}/Texture.h

@@ -5,8 +5,7 @@ namespace PE::Engine {
 
     Core::Core()
             : m_ecs(ECS::MakeECS()),
-              m_res_manager(Resource::MakeManager())
-    {}
+              m_res_manager(Resource::MakeManager()) {}
 
     void Core::init() {
         // UTILS
@@ -19,12 +18,10 @@ namespace PE::Engine {
 
         // RENDERER SYSTEM
         Render::init();
-        m_context = std::shared_ptr<Render::Context>(
-                Render::createContext(
-                    config->get<std::string>("title"),
-                    config->get<uint32_t>("width"),
-                    config->get<uint32_t>("height")
-                )
+        m_context = Render::createContext(
+                config->get<std::string>("title"),
+                config->get<uint32_t>("width"),
+                config->get<uint32_t>("height")
         );
 
         // RESOURCE MANAGER
@@ -35,6 +32,9 @@ namespace PE::Engine {
 
         // MAIN SCENE
         auto scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
+
+        // Model
+        auto model = m_res_manager->load<Render::Model>("res/ForestScene.obj", m_res_manager);
 
         initLoop();
     }
@@ -74,18 +74,16 @@ namespace PE::Engine {
         double currentTime = m_context->getTime();
         double accumulator = 0.0;
 
-        while(m_context->isRunning())
-        {
+        while (m_context->isRunning()) {
             double newTime = m_context->getTime();
             double frameTime = newTime - currentTime;
-            if( frameTime > 0.25 )
+            if (frameTime > 0.25)
                 frameTime = 0.25;
 
             currentTime = newTime;
             accumulator += frameTime;
 
-            while( accumulator >= dt )
-            {
+            while (accumulator >= dt) {
                 // logic here
                 m_context->processInput();
                 fixedUpdate();

@@ -1,7 +1,6 @@
 
-#include <PE/Render/Texture.h>
-
 #include "PE/Render/Texture.h"
+#include <stb_image.h>
 
 namespace PE::Render {
 

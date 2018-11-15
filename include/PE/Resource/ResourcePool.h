@@ -6,10 +6,14 @@
 #include <stack>
 #include <memory>
 #include <unordered_map>
+#include <iostream>
+#include <algorithm>
 
 #include "Defines.h"
 #include "IResource.h"
 #include "ResourceHandle.h"
+
+#include "PE/Utils/Utils.h"
 
 namespace PE::Resource {
 
@@ -56,6 +60,10 @@ namespace PE::Resource {
         using CounterPtr = std::unique_ptr<ReferenceCount>;
         using Handle = ResourceHandle<Resource>;
 
+        enum : ResourceIndex {
+            INVALID_INDEX = ~ResourceIndex(0)
+        };
+
     public:
         explicit ResourcePool() = default;
 
@@ -83,13 +91,52 @@ namespace PE::Resource {
 
         void destroyResource(ResourceIndex);
 
+        inline ResourceIndex getResID(ResourceIndex proxy_index) const {
+            return m_proxy[proxy_index];
+        }
+
+        inline ReferenceCount* getResCounter(ResourceIndex proxy_index) {
+            return m_resources[getResID(proxy_index)].second.get();
+        }
+
+        inline Resource* getRes(ResourceIndex proxy_index) {
+            return m_resources[getResID(proxy_index)].first.get();
+        }
+
+        inline void print() {
+            std::cout << "-------------------" << std::endl;
+
+            std::cout << std::string(typeid(Resource).name()) << std::endl;
+
+            std::cout << "m_proxy [size " << m_proxy.size() << "] :";
+            std::for_each(m_proxy.begin(), m_proxy.end(), [](auto &e) {
+                std::cout << " " << (e == INVALID_INDEX ? std::string("null") : std::to_string(e));
+            });
+            std::cout << std::endl;
+
+            std::cout << "m_proxy_reverse [size " << m_proxy_reverse.size() << "] :";
+            std::for_each(m_proxy_reverse.begin(), m_proxy_reverse.end(), [](auto &e) {
+                std::cout << " " << e;
+            });
+            std::cout << std::endl;
+
+            std::cout << "m_resources [size " << m_resources.size() << "] :";
+            std::for_each(m_resources.begin(), m_resources.end(), [](auto &e) {
+                std::cout << " [" << (e.first.get() == nullptr ? "null": "res") << " - " << e.second.get()->getCount() << "]";
+            });
+            std::cout << std::endl;
+
+            std::cout << "-------------------" << std::endl;
+        }
+
         std::unordered_map<std::string, ResourceIndex> m_cache;
         std::unordered_map<ResourceIndex, std::string> m_reverse_cache;
 
-        std::vector<CounterPtr> m_counters; // todo std::pair
-        std::vector<ResourcePtr> m_pool;
-        std::stack<ResourceIndex> m_free_indexes;
-        // todo proxy
+        std::vector<std::pair<ResourcePtr, CounterPtr>> m_resources;
+
+        std::vector<ResourceIndex> m_proxy;
+        std::vector<ResourceIndex> m_proxy_reverse;
+        std::stack<ResourceIndex> m_proxy_free_indexes;
     };
 
 
@@ -99,16 +146,29 @@ namespace PE::Resource {
      * @tparam Resource
      */
     template<typename Resource>
-    void ResourcePool<Resource>::destroyResource(ResourceIndex index) {
-        m_pool.erase(m_pool.begin() + index);
-        m_counters.erase(m_counters.begin() + index);
-        m_free_indexes.push(index);
+    void ResourcePool<Resource>::destroyResource(ResourceIndex proxy_index) {
 
-        if (m_reverse_cache.find(index) != m_reverse_cache.end()) {
-            auto path = m_reverse_cache[index];
+        auto proxy_last_index = m_proxy_reverse.back();
+        auto proxy_reverse_element_index = m_proxy[proxy_index];
+
+        m_proxy[proxy_last_index] = m_proxy[proxy_index];
+        m_proxy[proxy_index] = INVALID_INDEX;
+
+        std::swap(m_proxy_reverse[proxy_reverse_element_index], m_proxy_reverse.back());
+        m_proxy_reverse.pop_back();
+
+        std::swap(m_resources[proxy_reverse_element_index], m_resources.back());
+        m_resources.pop_back();
+
+        m_proxy_free_indexes.push(proxy_index);
+
+        if (m_reverse_cache.find(proxy_index) != m_reverse_cache.end()) {
+            auto path = m_reverse_cache[proxy_index];
+
+            Utils::log("Res deleted: " + path +  " [" + typeid(Resource).name() + "]");
 
             m_cache.erase(path);
-            m_reverse_cache.erase(index);
+            m_reverse_cache.erase(proxy_index);
         }
     }
 
@@ -121,18 +181,22 @@ namespace PE::Resource {
 
         if (search != m_cache.end()) {
             // found
+            Utils::log("Res from cache: " + path + " [" + typeid(Resource).name() + "]");
+
             return {search->second, this->shared_from_this()};
         } else {
             // not found
-            auto index = allocResource(std::forward<Args>(args)...);
+            Utils::log("Res from file: " + path + " [" + typeid(Resource).name() + "]");
+
+            auto proxy_index = allocResource(std::forward<Args>(args)...);
 
             // add to cache
-            m_cache[path] = index;
-            m_reverse_cache[index] = path;
+            m_cache[path] = proxy_index;
+            m_reverse_cache[proxy_index] = path;
 
-            m_pool[index]->load(path);
+            getRes(proxy_index)->load(path);
 
-            return {index, this->shared_from_this()};
+            return {proxy_index, this->shared_from_this()};
         }
     }
 
@@ -152,20 +216,22 @@ namespace PE::Resource {
     template<typename Resource>
     template<typename... Args>
     ResourceIndex ResourcePool<Resource>::allocResource(Args &&... args) {
-        ResourceIndex index;
+        ResourceIndex proxy_index, res_index;
 
-        if (m_free_indexes.empty()) {
-            index = m_pool.size();
-            m_pool.emplace_back(new Resource(std::forward<Args>(args)...));
-            m_counters.emplace_back(new ReferenceCount());
+        if (m_proxy_free_indexes.empty()) {
+            proxy_index = m_proxy.size();
+            res_index = m_resources.size();
+            m_proxy.push_back(res_index);
         } else {
-            index = m_free_indexes.top();
-            m_free_indexes.pop();
-            m_pool.emplace(m_pool.begin() + index, new Resource(std::forward<Args>(args)...));
-            m_counters.emplace(m_counters.begin() + index, new ReferenceCount());
+            proxy_index = m_proxy_free_indexes.top();
+            m_proxy_free_indexes.pop();
+            m_proxy[proxy_index] = m_resources.size();
         }
 
-        return index;
+        m_resources.emplace_back(new Resource(std::forward<Args>(args)...), new ReferenceCount());
+        m_proxy_reverse.push_back(proxy_index);
+
+        return proxy_index;
     }
 
     /**
@@ -174,8 +240,8 @@ namespace PE::Resource {
      * @param index
      */
     template<typename Resource>
-    void ResourcePool<Resource>::incrementCounter(ResourceIndex index) {
-        m_counters[index]->increment();
+    void ResourcePool<Resource>::incrementCounter(ResourceIndex proxy_index) {
+        getResCounter(proxy_index)->increment();
     }
 
     /**
@@ -184,11 +250,11 @@ namespace PE::Resource {
      * @param index
      */
     template<typename Resource>
-    void ResourcePool<Resource>::decrementCounter(ResourceIndex index) {
-        m_counters[index]->decrement();
+    void ResourcePool<Resource>::decrementCounter(ResourceIndex proxy_index) {
+        getResCounter(proxy_index)->decrement();
 
-        if(m_counters[index]->getCount() == 0)
-            destroyResource(index);
+        if(getResCounter(proxy_index)->getCount() == 0)
+            destroyResource(proxy_index);
     }
 
     /**
@@ -198,18 +264,18 @@ namespace PE::Resource {
      * @return
      */
     template<typename Resource>
-    Resource *ResourcePool<Resource>::get(ResourceIndex index) {
-        return m_pool[index].get();
+    Resource *ResourcePool<Resource>::get(ResourceIndex proxy_index) {
+        return getRes(proxy_index);
     }
 
     template<typename Resource>
-    std::size_t ResourcePool<Resource>::getCount(ResourceIndex index) const {
-        return m_counters[index]->getCount();
+    std::size_t ResourcePool<Resource>::getCount(ResourceIndex proxy_index) const {
+        return getResCounter(proxy_index)->getCount();
     }
 
     template<typename Resource>
     std::size_t ResourcePool<Resource>::getSize() const {
-        return m_pool.size();
+        return m_resources.size();
     }
 
 

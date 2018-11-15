@@ -3,38 +3,9 @@
 
 namespace PE::Render {
 
-    unsigned int generateTexture(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-        unsigned int ID;
-        GLubyte data[] = { r, g, b, a };
-
-        glGenTextures(1, &ID);
-
-        glBindTexture(GL_TEXTURE_2D, ID);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-        return ID;
-    }
-
-    unsigned int Mesh::transparentTexture = 0;
-    unsigned int Mesh::whiteTexture = 0;
-
-    Mesh::Mesh(std::vector<Vertex> t_vertices, std::vector<unsigned int> t_indices, std::vector<Texture> t_textures)
-        : m_vertices(std::move(t_vertices)), m_indices(std::move(t_indices)), m_textures(std::move(t_textures))
+    Mesh::Mesh(std::vector<Vertex> t_vertices, std::vector<unsigned int> t_indices)
+        : m_vertices(std::move(t_vertices)), m_indices(std::move(t_indices))
     {
-        if(!transparentTexture) {
-            transparentTexture = generateTexture(255, 255, 255, 0);
-        }
-
-        if(!whiteTexture) {
-            whiteTexture = generateTexture(255, 255, 255, 255);
-        }
-
         setupMesh();
     }
 
@@ -71,10 +42,8 @@ namespace PE::Render {
     Mesh::~Mesh() {
         // Dont do it, because in other places (eg vectors) Mesh will be copied and so
 
-        /*
         glDeleteVertexArrays(1, &m_VAO);
         glDeleteBuffers(1, &m_VBO);
         glDeleteBuffers(1, &m_EBO);
-         */
     }
 }
