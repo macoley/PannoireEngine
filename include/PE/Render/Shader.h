@@ -79,9 +79,7 @@ namespace PE::Render {
 
         void load(const std::string &path) override;
 
-        inline void use() const {
-            glUseProgram(m_shaderProgramID);
-        }
+        void use() const;
 
         ProgramID getID() {
             return m_shaderProgramID;
@@ -90,38 +88,20 @@ namespace PE::Render {
         /*
          * SETTERS
          */
-        inline void set(const std::string &name, bool value) const
-        {
-            glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), (int) value);
-        }
+        void set(const std::string &name, bool value) const;
 
-        inline void set(const std::string &name, int value) const
-        {
-            glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
-        }
+        void set(const std::string &name, int value) const;
 
-        inline void set(const std::string &name, float value) const
-        {
-            glUniform1f(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
-        }
+        void set(const std::string &name, float value) const;
 
-        inline void set(const std::string &name, const glm::mat4 &matrix) const
-        {
-            glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
-        }
+        void set(const std::string &name, const glm::mat4 &matrix) const;
 
-        inline void set(const std::string &name, glm::vec3 v) const
-        {
-            glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v.x, v.y, v.z);
-        }
+        void set(const std::string &name, glm::vec3 v) const;
 
-        inline void set(const std::string &name, float v0, float v1, float v2) const
-        {
-            glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v0, v1, v2);
-        }
+        void set(const std::string &name, float v0, float v1, float v2) const;
 
         template<typename T>
-        inline void set(const std::string &name, T value) const
+        void set(const std::string &name, T value) const
         {}
 
     private:

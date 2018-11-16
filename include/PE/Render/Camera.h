@@ -22,7 +22,7 @@ namespace PE::Render {
 
     class Camera {
     public:
-        Camera(glm::vec3 cameraPos = {0.0f, 0.0f, 0.0f}, float pitch = PITCH, float yaw = YAW);
+        Camera(uint32_t width, uint32_t height, float xPos, float yPos, float zPos, float pitch = PITCH, float yaw = YAW);
 
         void zoom(float yoffset);
         void move(Camera_Movement direction);
@@ -31,6 +31,9 @@ namespace PE::Render {
         float getFov() { return fov; };
         const glm::mat4 &getView() { return m_view; };
         glm::vec3 getPos() { return cameraPos; };
+        const glm::mat4 &getProjection() { return m_projection; }
+
+        void setProjection(uint32_t width, uint32_t height, float near = .1f, float far = 100.0f);
 
     private:
         glm::vec3 cameraPos;
@@ -47,6 +50,7 @@ namespace PE::Render {
         void calculateView();
 
         glm::mat4 m_view;
+        glm::mat4 m_projection;
     };
 
 

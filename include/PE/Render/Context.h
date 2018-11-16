@@ -25,6 +25,7 @@ namespace PE::Render {
 
     class Context {
         using RenderFunction = std::function<void ()>;
+        using ResizeFunction = std::function<void (uint32_t, uint32_t)>;
 
     public:
         Context(const std::string &, uint32_t, uint32_t);
@@ -37,7 +38,9 @@ namespace PE::Render {
         void pollEvents();
         void render(RenderFunction);
 
-        void configCamera(Shader &shader, Camera *camera);
+        void setResizeCallback(ResizeFunction fnc) {
+            m_resizeCallback = std::move(fnc);
+        }
 
     private:
         GLFWwindow* m_window;
@@ -46,6 +49,8 @@ namespace PE::Render {
         uint32_t m_width, m_height;
 
         glm::mat4 m_temp_model;
+
+        ResizeFunction m_resizeCallback;
     };
 }
 

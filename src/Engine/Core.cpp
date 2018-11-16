@@ -3,10 +3,6 @@
 
 namespace PE::Engine {
 
-    Resource::ResourceHandle<Render::Model> model;
-    Resource::ResourceHandle<Render::Shader> shader;
-    Render::Camera *camera;
-
     Core::Core()
             : m_ecs(ECS::MakeECS()),
               m_res_manager(Resource::MakeManager()) {}
@@ -19,7 +15,6 @@ namespace PE::Engine {
         // APP CONFIG
         auto config = m_res_manager->load<Resource::Properties>("config.yml");
 
-
         // RENDERER SYSTEM
         Render::init();
         m_context = Render::createContext(
@@ -28,18 +23,13 @@ namespace PE::Engine {
                 config->get<uint32_t>("height")
         );
 
-        // RESOURCE MANAGER
-        auto texture = m_res_manager->load<Render::Texture>("container.jpg");
-
-        // todo one shader manifest, two shader classes
-        shader = m_res_manager->load<Render::Shader>("shader.yml", m_res_manager);
+        m_context->setResizeCallback([&](uint32_t width, uint32_t height) {
+           config->set("width", width);
+           config->set("height", height);
+        });
 
         // MAIN SCENE
-        auto scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
-
-        // Model
-        model = m_res_manager->load<Render::Model>("res/ForestScene.obj", m_res_manager);
-        camera = new Render::Camera({0.5f, 0.5f, 15.0f});
+        scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
 
         initLoop();
     }
@@ -57,12 +47,8 @@ namespace PE::Engine {
     void Core::update(double alpha) {
         m_context->pollEvents();
 
-        // For alpha I need to create transform old and new...
-        //m_ecs->updateSystem<Render::RenderSystem>();
-
         m_context->render([&]() {
-            m_context->configCamera(*shader, camera);
-            model->draw(*shader);
+            scene->draw();
         });
     }
 
@@ -110,10 +96,6 @@ namespace PE::Engine {
 
     Core::~Core() {
         Utils::log("Engine turned off");
-
-        model.destroy();
-        shader.destroy();
-        delete camera;
     }
 
 }

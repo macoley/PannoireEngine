@@ -6,9 +6,8 @@
 namespace PE::Engine {
 
     void Scene::load(const std::string &path) {
-        m_properties = m_manager->load<Resource::Properties>(path);
-
-        auto entitiesNode = m_properties->get<YAML::Node>("entities");
+        auto properties = m_manager->load<Resource::Properties>(path);
+        auto entitiesNode = properties->get<YAML::Node>("entities");
 
         for (std::size_t i = 0; i < entitiesNode.size(); i++) {
             makeEntity(entitiesNode[i]);
@@ -37,10 +36,18 @@ namespace PE::Engine {
             {
                 m_ecs->assignComponent<Component::Transform>(
                         entity,
-                        component["x"].as<double>(),
-                        component["y"].as<double>(),
-                        component["z"].as<double>()
+                        component["xPos"].as<float>(),
+                        component["yPos"].as<float>(),
+                        component["zPos"].as<float>(),
+                        component["xScale"].as<float>(),
+                        component["yScale"].as<float>(),
+                        component["zScale"].as<float>(),
+                        component["xAngle"].as<float>(),
+                        component["yAngle"].as<float>(),
+                        component["zAngle"].as<float>()
                 );
+
+                continue;
             }
 
             // Todo other components
@@ -49,8 +56,20 @@ namespace PE::Engine {
         m_entities.push_back(entity);
     }
 
+    /**
+     * Draw
+     */
+    void Scene::draw() {
+        m_shader->use();
 
+        m_shader->set("projection", m_camera->getProjection());
+        m_shader->set("view", m_camera->getView());
 
+        m_ecs->view<Component::Transform>()
+                .each([&](const ECS::Entity entity, Component::Transform& t) {
+                    m_model->draw(*m_shader, t.xPos, t.yPos, t.zPos, t.xScale, t.yScale, t.zScale, t.xAngle, t.yAngle, t.zAngle);
+                });
+    }
 
 
 }

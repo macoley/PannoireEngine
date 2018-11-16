@@ -5,8 +5,8 @@
 
 namespace PE::Render {
 
-    Camera::Camera(glm::vec3 cameraPos, float pitch, float yaw)
-            : cameraPos(cameraPos),
+    Camera::Camera(uint32_t width, uint32_t height, float xPos, float yPos, float zPos, float pitch, float yaw)
+            : cameraPos(xPos, yPos, zPos),
               cameraFront(0.0f, 0.0f, -1.0f),
               cameraUp(0.0f, 1.0f, 0.0f),
               pitch(pitch),
@@ -17,6 +17,7 @@ namespace PE::Render {
     {
         calculateFront();
         calculateView();
+        setProjection(width, height);
     }
 
     void Camera::move(Camera_Movement direction) {
@@ -83,6 +84,10 @@ namespace PE::Render {
 
     void Camera::calculateView() {
         m_view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+
+    void Camera::setProjection(uint32_t width, uint32_t height, float near, float far) {
+        m_projection = glm::perspective(glm::radians(fov), (float) width / (float) height, near, far);
     }
 
 }

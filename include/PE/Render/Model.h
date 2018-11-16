@@ -27,7 +27,11 @@ namespace PE::Render {
         explicit Model(ManagerPtr manager) : m_manager(std::move(manager)) {};
         virtual ~Model();
 
-        void draw(Shader & t_shader);
+        void draw(Shader & t_shader,
+                float xPos, float yPos, float zPos,
+                float xScale, float yScale, float zScale,
+                float xAngle, float yAngle, float zAngle);
+
         void load(const std::string & path) override;
 
     private:

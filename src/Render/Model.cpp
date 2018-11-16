@@ -135,9 +135,21 @@ namespace PE::Render {
      * Draw Model
      * @param t_shader
      */
-    void Model::draw(Shader &shader) {
+    void Model::draw(Shader &shader,
+                     float xPos, float yPos, float zPos,
+                     float xScale, float yScale, float zScale,
+                     float xAngle, float yAngle, float zAngle) {
+
+        glm::mat4 matrix;
+        matrix = glm::rotate(matrix, xAngle, glm::vec3(1.0f, .0f, .0f));
+        matrix = glm::rotate(matrix, yAngle, glm::vec3(.0f, 1.0f, .0f));
+        matrix = glm::rotate(matrix, zAngle, glm::vec3(.0f, .0f, 1.0f));
+        matrix = glm::translate(matrix, glm::vec3(xPos, yPos, zPos));
+        matrix = glm::scale(matrix, glm::vec3(xScale, yScale, zScale));
+        shader.set("model", matrix);
+
         std::for_each(m_meshes.begin(), m_meshes.end(), [&](MeshRender &m) {
-            shader.use(); // todo shader from material
+            //shader.use(); // todo shader from material
 
             // Textures (todo move to material class)
             uint8_t i = 0, j;
