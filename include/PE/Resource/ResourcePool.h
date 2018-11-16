@@ -85,6 +85,9 @@ namespace PE::Resource {
 
         std::size_t getSize() const;
 
+        template<typename... Args>
+        void swapLoadResource(const std::string &old_path, const std::string &new_path, Args &&... args);
+
     private:
         template<typename... Args>
         ResourceIndex allocResource(Args &&... args);
@@ -137,6 +140,8 @@ namespace PE::Resource {
         std::vector<ResourceIndex> m_proxy;
         std::vector<ResourceIndex> m_proxy_reverse;
         std::stack<ResourceIndex> m_proxy_free_indexes;
+
+        std::vector<uint32_t> m_aliases_counter;
     };
 
 
@@ -147,28 +152,40 @@ namespace PE::Resource {
      */
     template<typename Resource>
     void ResourcePool<Resource>::destroyResource(ResourceIndex proxy_index) {
-        auto proxy_last_index = m_proxy_reverse.back();
+
         auto proxy_reverse_element_index = m_proxy[proxy_index];
 
-        m_proxy[proxy_last_index] = m_proxy[proxy_index];
-        m_proxy[proxy_index] = INVALID_INDEX;
-
-        std::swap(m_proxy_reverse[proxy_reverse_element_index], m_proxy_reverse.back());
-        m_proxy_reverse.pop_back();
-
-        std::swap(m_resources[proxy_reverse_element_index], m_resources.back());
-        m_resources.pop_back();
-
-        m_proxy_free_indexes.push(proxy_index);
-
-        if (m_reverse_cache.find(proxy_index) != m_reverse_cache.end()) {
-            auto path = m_reverse_cache[proxy_index];
-
-            Utils::log("Res deleted: " + path +  " [" + typeid(Resource).name() + "]");
-
-            m_cache.erase(path);
+        if(m_aliases_counter[proxy_reverse_element_index] > 0)
+        {
+            m_aliases_counter[proxy_reverse_element_index]--;
+            m_proxy[proxy_index] = INVALID_INDEX;
             m_reverse_cache.erase(proxy_index);
         }
+        else
+        {
+            auto proxy_last_index = m_proxy_reverse.back();
+
+            m_proxy[proxy_last_index] = m_proxy[proxy_index];
+            m_proxy[proxy_index] = INVALID_INDEX;
+
+            std::swap(m_proxy_reverse[proxy_reverse_element_index], m_proxy_reverse.back());
+            m_proxy_reverse.pop_back();
+
+            std::swap(m_resources[proxy_reverse_element_index], m_resources.back());
+            m_resources.pop_back();
+
+            m_proxy_free_indexes.push(proxy_index);
+
+            if (m_reverse_cache.find(proxy_index) != m_reverse_cache.end()) {
+                auto path = m_reverse_cache[proxy_index];
+
+                Utils::log("Res deleted: " + path +  " [" + typeid(Resource).name() + "]");
+
+                m_cache.erase(path);
+                m_reverse_cache.erase(proxy_index);
+            }
+        }
+
     }
 
     template<typename Resource>
@@ -221,6 +238,10 @@ namespace PE::Resource {
             proxy_index = m_proxy.size();
             res_index = m_resources.size();
             m_proxy.push_back(res_index);
+
+            if (res_index >= m_aliases_counter.size()) {
+                m_aliases_counter.resize(res_index + 1, 0);
+            }
         } else {
             proxy_index = m_proxy_free_indexes.top();
             m_proxy_free_indexes.pop();
@@ -275,6 +296,32 @@ namespace PE::Resource {
     template<typename Resource>
     std::size_t ResourcePool<Resource>::getSize() const {
         return m_resources.size();
+    }
+
+    template<typename Resource>
+    template<typename... Args>
+    void ResourcePool<Resource>::swapLoadResource(const std::string &old_path, const std::string &new_path, Args &&... args) {
+        auto proxy_index = m_cache[old_path];
+
+        if ((m_cache.find(new_path) != m_cache.end()) && (old_path != new_path)) {
+            // found
+            m_cache.erase(old_path);
+            m_reverse_cache[proxy_index] = new_path;
+
+            m_proxy[proxy_index] = m_proxy[m_cache[new_path]];
+            m_aliases_counter[proxy_index]++;
+
+        } else {
+            // not found
+            ResourcePtr newRes(new Resource(std::forward<Args>(args)...));
+            newRes->load(new_path);
+
+            m_resources[getResID(proxy_index)].first.swap(newRes);
+
+            m_cache.erase(old_path);
+            m_cache[new_path] = proxy_index;
+            m_reverse_cache[proxy_index] = new_path;
+        }
     }
 
 
