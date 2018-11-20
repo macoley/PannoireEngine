@@ -67,16 +67,34 @@ namespace PE::Resource {
             return m_pool->get(m_index);
         }
 
+        Resource *get() {
+            assert(!m_weak);
+            return m_pool->get(m_index);
+        }
+
+        const Resource &operator*() const {
+            assert(!m_weak);
+            return *(m_pool->get(m_index));
+        }
+
+        const Resource *operator->() const {
+            assert(!m_weak);
+            return m_pool->get(m_index);
+        }
+
         std::size_t getRefCount() const {
             assert(!m_weak);
             return m_pool->getCount(m_index);
         }
 
-        void destroy()
-        {
+        void destroy() {
             decrement();
             m_weak = true;
             m_pool.reset();
+        }
+
+        ResourceIndex getIndex() {
+            return m_index;
         }
 
     private:

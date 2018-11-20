@@ -9,8 +9,8 @@ namespace PE::Engine {
         auto properties = m_manager->load<Resource::Properties>(path);
         auto entitiesNode = properties->get<YAML::Node>("entities");
 
-        for (std::size_t i = 0; i < entitiesNode.size(); i++) {
-            makeEntity(entitiesNode[i]);
+        for(const YAML::Node &n : entitiesNode) {
+            makeEntity(n);
         }
     }
 
@@ -24,15 +24,16 @@ namespace PE::Engine {
     /**
      * Helper
      */
-    void Scene::makeEntity(YAML::Node entityNode) {
+    void Scene::makeEntity(const YAML::Node &entityNode) {
         auto entity = m_ecs->createEntity();
         auto componentsNode = entityNode["components"];
 
         for (std::size_t i = 0; i < componentsNode.size(); i++) {
             auto component = componentsNode[i];
+            auto type = component["type"].as<std::string>();
 
             // Transform component
-            if(component["type"].as<std::string>() == "Transform")
+            if(type == "Transform")
             {
                 m_ecs->assignComponent<Component::Transform>(
                         entity,
@@ -50,26 +51,23 @@ namespace PE::Engine {
                 continue;
             }
 
+            if(type == "Model")
+            {
+                auto res = m_manager->load<Render::Model>(component["path"].as<std::string>(), m_manager);
+                m_models.push_back(res);
+
+                m_ecs->assignComponent<Component::Model>(
+                        entity,
+                        static_cast<uint32_t>(res.getIndex())
+                );
+
+                continue;
+            }
+
             // Todo other components
         }
 
         m_entities.push_back(entity);
     }
-
-    /**
-     * Draw
-     */
-    void Scene::draw() {
-        m_shader->use();
-
-        m_shader->set("projection", m_camera->getProjection());
-        m_shader->set("view", m_camera->getView());
-
-        m_ecs->view<Component::Transform>()
-                .each([&](const ECS::Entity entity, Component::Transform& t) {
-                    m_model->draw(*m_shader, t.xPos, t.yPos, t.zPos, t.xScale, t.yScale, t.zScale, t.xAngle, t.yAngle, t.zAngle);
-                });
-    }
-
 
 }

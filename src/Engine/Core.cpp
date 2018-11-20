@@ -15,21 +15,42 @@ namespace PE::Engine {
         // APP CONFIG
         auto config = m_res_manager->load<Resource::Properties>("config.yml");
 
-        // RENDERER SYSTEM
-        Render::init();
+        // RENDER CONTEXT
         m_context = Render::createContext(
                 config->get<std::string>("title"),
                 config->get<uint32_t>("width"),
                 config->get<uint32_t>("height")
         );
-
-        m_context->setResizeCallback([&](uint32_t width, uint32_t height) {
-           config->set("width", width);
-           config->set("height", height);
-        });
+        Render::Texture::placeholdersInit();
 
         // MAIN SCENE
-        scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
+        m_camera = std::make_shared<Render::Camera>(
+                config->get<uint32_t>("width"),
+                config->get<uint32_t>("height")
+        );
+        m_camera->setPos(0.5f, 0.5f, 15.0f);
+
+        m_context->setInputCallback([&](uint32_t key, uint32_t action) {
+
+            if(key == 68 /*d*/)
+                m_camera->move(Render::Camera_Movement::RIGHT);
+
+            if(key == 65 /*a*/)
+                m_camera->move(Render::Camera_Movement::LEFT);
+
+            if(key == 87 /*w*/)
+                m_camera->move(Render::Camera_Movement::FORWARD);
+
+            if(key == 83 /*s*/)
+                m_camera->move(Render::Camera_Movement::BACKWARD);
+
+        });
+
+        m_shader = m_res_manager->load<Render::Shader>("shader.yml", m_res_manager);
+        m_scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
+
+        // RENDERER
+        m_renderer = std::make_shared<Render::Renderer>(m_camera);
 
         initLoop();
     }
@@ -39,6 +60,22 @@ namespace PE::Engine {
      */
     void Core::fixedUpdate() {
         m_context->processInput();
+
+        m_renderer->reset();
+        m_ecs->view<Component::Transform, Component::Model>()
+                .each([&](const ECS::Entity entity, Component::Transform &t, Component::Model &r) {
+
+                    for (auto &element : m_res_manager->get<Render::Model>(r.resIndex)->getObject()) {
+                        m_renderer->add(
+                                element.first.get(), element.second.get(),
+                                t.xPos, t.yPos, t.zPos,
+                                t.xAngle, t.yAngle, t.zAngle,
+                                t.xScale, t.yScale, t.zScale
+                        );
+                    }
+
+                });
+        m_renderer->sort();
     }
 
     /**
@@ -48,7 +85,7 @@ namespace PE::Engine {
         m_context->pollEvents();
 
         m_context->render([&]() {
-            scene->draw();
+            m_renderer->render(*m_shader, alpha);
         });
     }
 
@@ -95,6 +132,8 @@ namespace PE::Engine {
     }
 
     Core::~Core() {
+        Render::Texture::placeholdersDestroy();
+
         Utils::log("Engine turned off");
     }
 

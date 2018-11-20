@@ -1,5 +1,5 @@
-#ifndef PANNOIREENGINE_TEXTURE_H
-#define PANNOIREENGINE_TEXTURE_H
+#ifndef PE_RENDER_TEXTURE_H
+#define PE_RENDER_TEXTURE_H
 
 #include <cstdint>
 #include <string>
@@ -18,6 +18,7 @@ namespace PE::Render {
     class Texture : public Resource::IResource {
     public:
         explicit Texture() = default;
+        Texture(uint32_t id, int32_t width, int32_t height, int32_t components) : m_id(id), m_width(width), m_height(height), m_components(components) {};
         virtual ~Texture();
 
         void load(const std::string & path) override;
@@ -37,6 +38,14 @@ namespace PE::Render {
             glBindTexture(GL_TEXTURE_2D, m_id);
         }
 
+        inline bool isTrasparent() const {
+            return (m_components == 4);
+        }
+
+        static void placeholdersInit();
+        static void placeholdersDestroy();
+        static Texture *white, *black, *transparent;
+
     private:
         void loadImageFromFile(const std::string& path);
 
@@ -48,4 +57,4 @@ namespace PE::Render {
 
 }
 
-#endif //PANNOIREENGINE_TEXTURE_H
+#endif //PE_RENDER_TEXTURE_H

@@ -1,5 +1,5 @@
-#ifndef PANNOIREENGINE_MODEL_H
-#define PANNOIREENGINE_MODEL_H
+#ifndef PE_RENDER_MODEL_H
+#define PE_RENDER_MODEL_H
 
 #include <vector>
 #include <string>
@@ -13,58 +13,40 @@
 #include "PE/Render/Texture.h"
 #include "PE/Resource/Resource.h"
 #include "PE/Render/Mesh.h"
+#include "PE/Render/Material.h"
 #include "PE/Utils/Utils.h"
 
 namespace PE::Render {
 
     class Model : public Resource::IResource {
-        using ManagerPtr = std::shared_ptr<Resource::ResourceManager>;
+        using ResManagerPtr = std::shared_ptr<Resource::ResourceManager>;
         using TextureHandle = Resource::ResourceHandle<Texture>;
-        using MeshHandle = Resource::ResourceHandle<Mesh>;
+
         using TextureHandleContainer = std::vector<TextureHandle>;
 
+        using MeshHandle = Resource::ResourceHandle<Mesh>;
+        using MaterialHandle = Resource::ResourceHandle<Material>;
+        using Element = std::pair<MeshHandle, MaterialHandle>;
     public:
-        explicit Model(ManagerPtr manager) : m_manager(std::move(manager)) {};
+        explicit Model(ResManagerPtr res_manager) : m_res_manager(std::move(res_manager)) {};
         virtual ~Model();
 
-        void draw(Shader & t_shader,
-                float xPos, float yPos, float zPos,
-                float xScale, float yScale, float zScale,
-                float xAngle, float yAngle, float zAngle);
-
         void load(const std::string & path) override;
+        std::vector<Element> &getObject();
 
     private:
-        struct Material {
-            // 1. diffuse maps
-            TextureHandleContainer diffuseMaps;
-            // 2. specular maps
-            TextureHandleContainer specularMaps;
-            // 3. normal maps
-            TextureHandleContainer normalMaps;
-            // 4. height maps
-            TextureHandleContainer heightMaps;
-            // 5. opacity maps
-            TextureHandleContainer opacityMaps;
-        };
-
-        struct MeshRender {
-            MeshHandle mesh;
-            Material material;
-        };
-
-        std::vector<MeshRender> m_meshes;
-        std::string directory;
+        std::vector<Element> m_objects;
+        std::string m_directory;
 
         void processNode(aiNode *node, const aiScene *scene);
         MeshHandle processMesh(aiMesh *mesh);
-        Material processMaterial(aiMaterial *material);
+        MaterialHandle processMaterial(aiMaterial *material);
         TextureHandleContainer processTextures(aiMaterial *material, aiTextureType type);
 
-        ManagerPtr m_manager;
+        ResManagerPtr m_res_manager;
     };
 
 }
 
 
-#endif //PANNOIREENGINE_MODEL_H
+#endif //PE_RENDER_MODEL_H

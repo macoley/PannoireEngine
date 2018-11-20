@@ -17,6 +17,9 @@
 
 namespace PE::Resource {
 
+    class ResourceManager;
+
+
     /**
      * Resource manager
      */
@@ -33,6 +36,9 @@ namespace PE::Resource {
 
         template<typename Resource, typename ... Args>
         ResourceHandle<Resource> load(const std::string &path, Args &&... args);
+
+        template<class Resource>
+        Resource *get(ResourceIndex);
 
         template<typename Resource>
         std::size_t getSize() const;
@@ -141,6 +147,20 @@ namespace PE::Resource {
 
         return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
                 ->getSize();
+    }
+
+    /**
+     * Get Resource pointer
+     * @tparam Resource
+     * @param resIndex
+     * @return
+     */
+    template<class Resource>
+    Resource *ResourceManager::get(ResourceIndex resIndex) {
+        auto index = ResourceCounter<Resource>::getFamily();
+
+        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
+                ->get(resIndex);
     }
 
 }

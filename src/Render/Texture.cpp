@@ -1,13 +1,13 @@
 
 #include "PE/Render/Texture.h"
 #include <stb_image.h>
+#include <PE/Render/Texture.h>
+
 
 namespace PE::Render {
 
     void Texture::loadImageFromFile(const std::string &path) {
-        unsigned char* data;
-
-        data = stbi_load(path.c_str(), &m_width, &m_height, &m_components, 0);
+        unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &m_components, 0);
 
         if (!data) {
             Utils::log("Texture failed to load at path: " + path);
@@ -48,4 +48,40 @@ namespace PE::Render {
     void Texture::load(const std::string &path) {
         loadImageFromFile(path);
     }
+
+    uint32_t generateTexture(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+        uint32_t id;
+        GLubyte data[] = { r, g, b, a };
+
+        glGenTextures(1, &id);
+
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        return id;
+    }
+
+
+    void Texture::placeholdersInit() {
+        Texture::black = new Texture(generateTexture(0, 0, 0, 255), 1, 1, 4);
+        Texture::white = new Texture(generateTexture(255, 255, 255, 255), 1, 1, 4);
+        Texture::transparent = new Texture(generateTexture(0, 0, 0, 0), 1, 1, 4);
+    }
+
+    void Texture::placeholdersDestroy() {
+        delete Texture::black;
+        delete Texture::white;
+        delete Texture::transparent;
+    }
+
+    Texture *Texture::black = nullptr;
+    Texture *Texture::white = nullptr;
+    Texture *Texture::transparent = nullptr;
+
 }

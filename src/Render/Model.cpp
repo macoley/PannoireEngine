@@ -7,15 +7,15 @@ namespace PE::Render {
 
     void Model::processNode(aiNode *node, const aiScene *scene) {
         // process all the node's meshes (if any)
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        for (std::size_t i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-            m_meshes.push_back({processMesh(mesh), processMaterial(material)});
+            m_objects.emplace_back(processMesh(mesh), processMaterial(material));
         }
 
         // then do the same for each of its children
-        for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        for (std::size_t i = 0; i < node->mNumChildren; i++) {
             processNode(node->mChildren[i], scene);
         }
     }
@@ -33,7 +33,7 @@ namespace PE::Render {
             return;
         }
 
-        directory = path.substr(0, path.find_last_of('/'));
+        m_directory = path.substr(0, path.find_last_of('/')); // wrrrr
         processNode(scene->mRootNode, scene);
 
         import.FreeScene();
@@ -46,15 +46,14 @@ namespace PE::Render {
      */
     Resource::ResourceHandle<Mesh> Model::processMesh(aiMesh *mesh) {
         std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
+        std::vector<uint32_t> indices;
 
         /**
          * Process Vertices
          */
 
-        for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+        for (std::size_t i = 0; i < mesh->mNumVertices; i++) {
             Vertex vertex;
-
 
             // Positions
             vertex.Position = glm::vec3(
@@ -79,20 +78,19 @@ namespace PE::Render {
             }
             vertex.TexCoords = vec;
 
-
             vertices.push_back(vertex);
         }
 
         /**
          * process indices
          */
-        for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+        for (std::size_t i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];
-            for (unsigned int j = 0; j < face.mNumIndices; j++)
+            for (std::size_t j = 0; j < face.mNumIndices; j++)
                 indices.push_back(face.mIndices[j]);
         }
 
-        return m_manager->create<Mesh>(std::move(vertices), std::move(indices));
+        return m_res_manager->create<Mesh>(vertices, indices);
     }
 
     /**
@@ -100,14 +98,14 @@ namespace PE::Render {
      * @param material
      * @return
      */
-    Model::Material Model::processMaterial(aiMaterial *material) {
-        Material mat;
-        mat.diffuseMaps = processTextures(material, aiTextureType_DIFFUSE);
-        mat.specularMaps = processTextures(material, aiTextureType_SPECULAR);
-        mat.normalMaps = processTextures(material, aiTextureType_HEIGHT);
-        mat.heightMaps = processTextures(material, aiTextureType_AMBIENT);
-        mat.opacityMaps = processTextures(material, aiTextureType_OPACITY);
-        return mat;
+    Model::MaterialHandle Model::processMaterial(aiMaterial *material) {
+        return m_res_manager->create<Material>(
+                processTextures(material, aiTextureType_DIFFUSE),
+                processTextures(material, aiTextureType_SPECULAR),
+                processTextures(material, aiTextureType_HEIGHT),
+                processTextures(material, aiTextureType_AMBIENT),
+                processTextures(material, aiTextureType_OPACITY)
+        );
     }
 
     /**
@@ -119,73 +117,26 @@ namespace PE::Render {
     Model::TextureHandleContainer Model::processTextures(aiMaterial *material, aiTextureType type) {
         TextureHandleContainer handles;
 
-        for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {
+        for (uint32_t i = 0; i < material->GetTextureCount(type); i++) {
             aiString str;
             material->GetTexture(type, i, &str);
 
             handles.push_back(
-                    m_manager->load<Texture>(directory + "\\" + str.C_Str())
+                    m_res_manager->load<Texture>(m_directory + "\\" + str.C_Str())
             );
         }
 
         return handles;
     }
 
-    /**
-     * Draw Model
-     * @param t_shader
-     */
-    void Model::draw(Shader &shader,
-                     float xPos, float yPos, float zPos,
-                     float xScale, float yScale, float zScale,
-                     float xAngle, float yAngle, float zAngle) {
-
-        glm::mat4 matrix;
-        matrix = glm::rotate(matrix, xAngle, glm::vec3(1.0f, .0f, .0f));
-        matrix = glm::rotate(matrix, yAngle, glm::vec3(.0f, 1.0f, .0f));
-        matrix = glm::rotate(matrix, zAngle, glm::vec3(.0f, .0f, 1.0f));
-        matrix = glm::translate(matrix, glm::vec3(xPos, yPos, zPos));
-        matrix = glm::scale(matrix, glm::vec3(xScale, yScale, zScale));
-        shader.set("model", matrix);
-
-        std::for_each(m_meshes.begin(), m_meshes.end(), [&](MeshRender &m) {
-            //shader.use(); // todo shader from material
-
-            // Textures (todo move to material class)
-            uint8_t i = 0, j;
-
-            j = 0;
-            for (TextureHandle &t : m.material.diffuseMaps) {
-                t->bindTexture(shader, "texture_diffuse_" + std::to_string(j++), i++);
-            }
-
-            j = 0;
-            for (TextureHandle &t : m.material.heightMaps) {
-                t->bindTexture(shader, "texture_height_" + std::to_string(j++), i++);
-            }
-
-            j = 0;
-            for (TextureHandle &t : m.material.normalMaps) {
-                t->bindTexture(shader, "texture_normal_" + std::to_string(j++), i++);
-            }
-
-            j = 0;
-            for (TextureHandle &t : m.material.opacityMaps) {
-                t->bindTexture(shader, "texture_opacity_" + std::to_string(j++), i++);
-            }
-
-            j = 0;
-            for (TextureHandle &t : m.material.specularMaps) {
-                t->bindTexture(shader, "texture_specular_" + std::to_string(j++), i++);
-            }
-
-            // Mesh render
-            m.mesh->draw(shader);
-        });
-    }
-
     Model::~Model() {
-        m_meshes.clear();
+        m_objects.clear();
     }
+
+    std::vector<Model::Element> &Model::getObject() {
+        return m_objects;
+    }
+
+
 
 }

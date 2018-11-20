@@ -7,10 +7,12 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
         ${INCROOT}/Defines.h
+        ${INCROOT}/Material.h
+        ${SRCROOT}/Material.cpp
+        ${INCROOT}/Renderer.h
+        ${SRCROOT}/Renderer.cpp
         ${INCROOT}/Render.h
         ${SRCROOT}/Render.cpp
-        #${INCROOT}/RenderSystem.h
-        #${SRCROOT}/RenderSystem.cpp
         ${INCROOT}/Context.h
         ${SRCROOT}/Context.cpp
         ${INCROOT}/Shader.h

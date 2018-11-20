@@ -1,5 +1,5 @@
-#ifndef PANNOIREENGINE_SHADER_H
-#define PANNOIREENGINE_SHADER_H
+#ifndef PE_RENDER_SHADER_H
+#define PE_RENDER_SHADER_H
 
 #include <fstream>
 #include <string>
@@ -24,49 +24,6 @@ namespace PE::Render {
     std::string loadSource(const std::string &path);
 
     /**
-     * Vertex Shader
-     */
-    class VertexShader : public Resource::IResource {
-    public:
-        VertexShader() = default;
-
-        virtual ~VertexShader();
-
-        void load(const std::string &path) override;
-
-        ProgramID getID() {
-            return m_vertexShaderID;
-        }
-
-    private:
-        void compile(const std::string &source);
-
-        ProgramID m_vertexShaderID{0};
-    };
-
-    /**
-     * Vertex Shader
-     */
-    class FragmentShader : public Resource::IResource {
-    public:
-        FragmentShader() = default;
-
-        virtual ~FragmentShader();
-
-        void load(const std::string &path) override;
-
-        ProgramID getID() {
-            return m_fragmentShaderID;
-        }
-
-    private:
-        void compile(const std::string &source);
-
-        ProgramID m_fragmentShaderID{0};
-    };
-
-
-    /**
      * Shader class
      */
     class Shader : public Resource::IResource {
@@ -79,30 +36,37 @@ namespace PE::Render {
 
         void load(const std::string &path) override;
 
-        void use() const;
-
-        ProgramID getID() {
-            return m_shaderProgramID;
-        }
-
         /*
          * SETTERS
          */
-        void set(const std::string &name, bool value) const;
 
-        void set(const std::string &name, int value) const;
+        void use() const {
+            glUseProgram(m_shaderProgramID);
+        }
 
-        void set(const std::string &name, float value) const;
+        void set(const std::string &name, bool value) const {
+            glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), (int) value);
+        }
 
-        void set(const std::string &name, const glm::mat4 &matrix) const;
+        void set(const std::string &name, int value) const {
+            glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
+        }
 
-        void set(const std::string &name, glm::vec3 v) const;
+        void set(const std::string &name, float value) const {
+            glUniform1f(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
+        }
 
-        void set(const std::string &name, float v0, float v1, float v2) const;
+        void set(const std::string &name, const glm::mat4 &matrix) const {
+            glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+        }
 
-        template<typename T>
-        void set(const std::string &name, T value) const
-        {}
+        void set(const std::string &name, glm::vec3 v) const {
+            glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v.x, v.y, v.z);
+        }
+
+        void set(const std::string &name, float v0, float v1, float v2) const {
+            glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v0, v1, v2);
+        }
 
     private:
         void compile(ProgramID vertexShaderID, ProgramID fragmentShaderID);
@@ -111,6 +75,42 @@ namespace PE::Render {
         ManagerPtr m_manager;
     };
 
+    /**
+     * Vertex Shader
+     */
+    class VertexShader : public Resource::IResource {
+        friend class Shader;
+    public:
+        VertexShader() = default;
+
+        virtual ~VertexShader();
+
+        void load(const std::string &path) override;
+
+    private:
+        void compile(const std::string &source);
+
+        ProgramID m_vertexShaderID{0};
+    };
+
+    /**
+     * Vertex Shader
+     */
+    class FragmentShader : public Resource::IResource {
+        friend class Shader;
+
+    public:
+        FragmentShader() = default;
+        virtual ~FragmentShader();
+
+        void load(const std::string &path) override;
+
+    private:
+        void compile(const std::string &source);
+
+        ProgramID m_fragmentShaderID{0};
+    };
+
 }
 
-#endif //PANNOIREENGINE_SHADER_H
+#endif //PE_RENDER_SHADER_H

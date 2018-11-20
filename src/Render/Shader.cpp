@@ -1,6 +1,4 @@
 
-#include <PE/Render/Shader.h>
-
 #include "PE/Render/Shader.h"
 
 namespace PE::Render {
@@ -71,35 +69,7 @@ namespace PE::Render {
         auto vertex = m_manager->load<VertexShader>(properties->get<std::string>("vertex_shader"));
         auto fragment = m_manager->load<FragmentShader>(properties->get<std::string>("fragment_shader"));
 
-        compile(vertex->getID(), fragment->getID());
-    }
-
-    void Shader::use() const {
-        glUseProgram(m_shaderProgramID);
-    }
-
-    void Shader::set(const std::string &name, bool value) const {
-        glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), (int) value);
-    }
-
-    void Shader::set(const std::string &name, int value) const {
-        glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
-    }
-
-    void Shader::set(const std::string &name, float value) const {
-        glUniform1f(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
-    }
-
-    void Shader::set(const std::string &name, const glm::mat4 &matrix) const {
-        glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
-    }
-
-    void Shader::set(const std::string &name, glm::vec3 v) const {
-        glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v.x, v.y, v.z);
-    }
-
-    void Shader::set(const std::string &name, float v0, float v1, float v2) const {
-        glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), v0, v1, v2);
+        compile(vertex->m_vertexShaderID, fragment->m_fragmentShaderID);
     }
 
     /**
