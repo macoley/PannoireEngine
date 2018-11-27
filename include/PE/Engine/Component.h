@@ -23,6 +23,10 @@ namespace PE::Engine::Component {
         uint32_t resIndex;
     };
 
+    struct Camera {
+        float zoom = 45.0f;
+    };
+
 }
 
 #endif //PANNOIREENGINE_ENGINE_COMPONENT_H

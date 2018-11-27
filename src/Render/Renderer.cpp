@@ -13,22 +13,22 @@ namespace PE::Render {
 
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
-        //render(shader, m_opaque);
+        render(shader, m_opaque);
 
-        //glDepthMask(GL_FALSE);
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         render(shader, m_transparent);
 
-        //glDisable(GL_BLEND);
-        //glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
     }
 
     void Renderer::sort() {
         std::sort(m_transparent.begin(), m_transparent.end(), [&](const RenderObject &a, const RenderObject &b) {
-            return glm::length(m_camera->getPos() - (a.m_position)) <
-                   glm::length(m_camera->getPos() - (b.m_position)); // todo optimize
+            return glm::length(m_camera->getPos() - (a.m_position + a.m_mesh->getCenter())) <
+                   glm::length(m_camera->getPos() - (b.m_position + b.m_mesh->getCenter())); // todo optimize
         });
     }
 

@@ -7,6 +7,13 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
         ${INCROOT}/Defines.h
+        ${INCROOT}/IFileMonitor.h
+        ${INCROOT}/WindowsFileMonitor.h
+        ${SRCROOT}/WindowsFileMonitor.cpp
+        ${INCROOT}/ResourceCounter.h
+        ${SRCROOT}/ResourceCounter.cpp
+        ${INCROOT}/IResource.h
+        ${SRCROOT}/IResource.cpp
         ${INCROOT}/Resource.h
         ${SRCROOT}/Resource.cpp
         ${INCROOT}/ResourceManager.h

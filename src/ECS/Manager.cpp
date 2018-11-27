@@ -42,6 +42,7 @@ namespace PE::ECS {
         for (ComponentFamily family = 0; family < m_component_pools.size() /* it means for every component */; ++family) {
             if(mask & (ComponentFamily (1) << family))
             {
+                //Utils::log(std::to_string(family) + " component deleted for " + std::to_string(entity) + " Entity destroyed.");
                 removeComponent(entity, family);
             }
         }

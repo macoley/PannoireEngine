@@ -7,7 +7,7 @@
 
 namespace PE::Render {
 
-    class Material : public Resource::IResource {
+    class Material : public Resource::IResource<Material> {
     public:
         using TextureHandle = Resource::ResourceHandle<Texture>;
         using TextureHandleContainer = std::vector<TextureHandle>;
@@ -31,7 +31,7 @@ namespace PE::Render {
 
         inline bool isTransparent() const;
 
-        void load(const std::string &path) override;
+        void load(const std::string &path);
 
     private:
         // 1. diffuse maps

@@ -20,16 +20,18 @@ struct TestComponent2 {
 
 TEST(testECS, initTest) {
     auto manager = ECS::MakeECS();
-    auto entity = manager->createEntity();
+    auto entity1 = manager->createEntity();
     auto entity2 = manager->createEntity();
     auto entity3 = manager->createEntity();
-    manager->assignComponent<TestComponent>(entity, 1, 2, 3);
+
+    manager->assignComponent<TestComponent>(entity1, 1, 2, 3);
     manager->assignComponent<TestComponent>(entity2);
     manager->assignComponent<TestComponent>(entity3);
 
-    manager->assignComponent<TestComponent2>(entity);
+    manager->assignComponent<TestComponent2>(entity1);
     manager->assignComponent<TestComponent2>(entity3);
-    auto& component = manager->getComponent<TestComponent>(entity);
+
+    auto& component = manager->getComponent<TestComponent>(entity1);
 
     EXPECT_EQ(2, component.b);
 
@@ -52,11 +54,32 @@ TEST(testECS, initTest) {
 
     EXPECT_EQ(666, manager->getComponent<TestComponent>(entity3).b);
 
-    manager->destroyEntity(entity);
+    manager->destroyEntity(entity1);
     manager->destroyEntity(entity2);
     manager->destroyEntity(entity3);
 
     //manager->getComponent<TestComponent>(entity2);
+}
+
+
+TEST(testECS, test2) {
+    auto manager = ECS::MakeECS();
+    auto entity1 = manager->createEntity();
+    auto entity2 = manager->createEntity();
+    auto entity3 = manager->createEntity();
+
+    manager->assignComponent<TestComponent>(entity1);
+    manager->assignComponent<TestComponent>(entity2);
+    manager->assignComponent<TestComponent>(entity3);
+
+    manager->destroyEntity(entity1);
+
+    auto entity4 = manager->createEntity();
+
+    Utils::log("Entity1: " + std::bitset<64>(entity1).to_string());
+    Utils::log("Entity4: " + std::bitset<64>(entity4).to_string());
+
+    manager->assignComponent<TestComponent>(entity4);
 }
 
 

@@ -18,7 +18,7 @@
 
 namespace PE::Render {
 
-    class Model : public Resource::IResource {
+    class Model : public Resource::IResource<Model> {
         using ResManagerPtr = std::shared_ptr<Resource::ResourceManager>;
         using TextureHandle = Resource::ResourceHandle<Texture>;
 
@@ -31,7 +31,7 @@ namespace PE::Render {
         explicit Model(ResManagerPtr res_manager) : m_res_manager(std::move(res_manager)) {};
         virtual ~Model();
 
-        void load(const std::string & path) override;
+        void load(const std::string & path);
         std::vector<Element> &getObject();
 
     private:

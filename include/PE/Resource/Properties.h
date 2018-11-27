@@ -10,7 +10,7 @@
 
 namespace PE::Resource {
 
-    class Properties : public IResource {
+    class Properties : public IResource<Properties> {
     public:
         Properties() = default;
         virtual ~Properties() = default;

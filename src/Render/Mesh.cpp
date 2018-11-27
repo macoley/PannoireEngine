@@ -44,6 +44,7 @@ namespace PE::Render {
 
     Mesh::~Mesh() {
         // Dont do it, because in other places (eg vectors) Mesh will be copied and so
+        glBindVertexArray(0);
 
         glDeleteVertexArrays(1, &m_VAO);
         glDeleteBuffers(1, &m_VBO);

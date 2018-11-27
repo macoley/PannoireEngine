@@ -7,6 +7,8 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 
 set(SRC
         ${INCROOT}/Locator.h
+        ${INCROOT}/ListenerBus.h
+        ${INCROOT}/Listener.h
         ${SRCROOT}/Locator.cpp
         ${INCROOT}/ILogger.h
         ${INCROOT}/ConsoleLogger.h

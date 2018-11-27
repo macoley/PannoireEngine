@@ -19,7 +19,7 @@
 
 namespace PE::Engine {
 
-    class Scene : public Resource::IResource {
+    class Scene : public Resource::IResource<Scene> {
         using PropertiesHandle = Resource::ResourceHandle<Resource::Properties>;
         using ModelHandle = Resource::ResourceHandle<Render::Model>;
 
@@ -30,14 +30,12 @@ namespace PE::Engine {
         explicit Scene(ResManagerPtr manager, ECSPtr ecs)
                 : m_ecs(std::move(ecs)),
                   m_manager(std::move(manager))
-        {
-            //m_model = m_manager->load<Render::Model>("res/ForestScene.obj", m_manager);
-        }
+        {}
 
-        Scene() = delete;
+        explicit Scene() = delete;
         virtual ~Scene();
 
-        void load(const std::string& path) override;
+        void load(const std::string& path);
 
     private:
         void makeEntity(const YAML::Node&);

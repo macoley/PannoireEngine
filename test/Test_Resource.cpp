@@ -7,21 +7,27 @@ using namespace PE;
 
 struct TestRes : public Resource::IResource {
     TestRes() {
-        Utils::log("Created new");
+        Utils::log("Created new TestRes");
     }
 
     virtual ~TestRes() {
-        Utils::log("Removed");
+        Utils::log("Removed TestRes");
     }
 
     void load(const std::string & path) override {
         Utils::log("Loaded: " + path);
     };
+
+    int test() {
+        return 5;
+    }
 };
+
 
 TEST(testResource, initTest) {
     auto res_manager = Resource::MakeManager();
 
+    res_manager->registerResource<TestRes>();
     auto res = res_manager->load<TestRes>("somepath.jpg");
     EXPECT_EQ(1, res.getRefCount());
     EXPECT_EQ(1, res_manager->getSize<TestRes>());
@@ -44,6 +50,54 @@ TEST(testResource, initTest) {
     EXPECT_EQ(1, res_manager->getSize<TestRes>());
     EXPECT_EQ(1, res.getRefCount());
 }
+
+
+struct Dep {
+    int a;
+};
+
+struct TestRes2 : public Resource::IResource {
+
+    TestRes2() {
+        Utils::log("Createt with empty constructor !!!!");
+    }
+
+
+    TestRes2(Dep dep) : m_dep(dep) {
+        Utils::log("Created new with dep " + std::to_string(dep.a));
+    }
+
+    TestRes2(TestRes dep) : m_dep2(dep) {
+        Utils::log("Created new with dep TestRes" + std::to_string(dep.test()));
+    }
+
+    virtual ~TestRes2() {
+        Utils::log("Removed TestRes2");
+    }
+
+    void load(const std::string & path) override {
+        Utils::log("Loaded: " + path);
+    };
+
+    Dep m_dep;
+    TestRes m_dep2;
+};
+
+TEST(testResource, initTest2) {
+    auto res_manager = Resource::MakeManager();
+
+    res_manager->registerResource<TestRes>();
+    auto res = res_manager->load<TestRes>("somepath.jpg");
+
+    //Dep dep{5};
+    TestRes dep2;
+
+    res_manager->registerResource<TestRes2>(dep2);
+    auto res2 = res_manager->load<TestRes2>("somepath2.jpg");
+
+
+}
+
 
 
 int main(int argc, char **argv) {

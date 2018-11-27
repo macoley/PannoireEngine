@@ -10,4 +10,5 @@ endfunction()
 
 pe_add_test(TESTNAME Test_ECS FILES Test_ECS.cpp MODULES pe_ecs pe_utils)
 pe_add_test(TESTNAME Test_Resource FILES Test_Resource.cpp MODULES pe_resource pe_utils)
+pe_add_test(TESTNAME Test_Messages FILES Test_Messages.cpp MODULES pe_utils)
 #pe_add_test(TESTNAME Test_Resource FILES Test_Resource.cpp MODULES pe_render pe_resource pe_engine)

@@ -72,6 +72,7 @@ namespace PE::ECS {
          */
         inline void removeComponent(Entity, ComponentFamily);
 
+
         /**
          * Data
          */
@@ -117,6 +118,8 @@ namespace PE::ECS {
 
             assert(m_component_pools.size()-1 == family); // if components were created only here?
         }
+
+        m_entity_component_mask[index] |= (ComponentFamily (1) << family);
 
         std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
                 ->add(entity, std::forward<Args>(args)...);

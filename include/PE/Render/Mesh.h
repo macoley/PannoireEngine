@@ -10,16 +10,20 @@
 
 #include "PE/Render/Shader.h"
 #include "PE/Render/Defines.h"
+#include "PE/Resource/Resource.h"
 
 namespace PE::Render {
 
     /**
      * Mesh class
      */
-    class Mesh {
+    class Mesh : public Resource::IResource<Mesh> {
     public:
         Mesh(std::vector<Vertex> t_vertices, std::vector<uint32_t> t_indices);
+        explicit Mesh() = default;
         virtual ~Mesh();
+
+        void load(const std::string&) {};
 
         inline void draw() const {
             glBindVertexArray(m_VAO);

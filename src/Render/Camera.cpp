@@ -13,16 +13,14 @@ namespace PE::Render {
               m_yaw(yaw),
               m_fov(FOV),
               m_speed(SPEED),
-              m_sensitivity(SENSIVITY)
-    {
+              m_sensitivity(SENSIVITY) {
         calculateFront();
         calculateView();
         setProjection(width, height);
     }
 
     void Camera::move(Camera_Movement direction) {
-        switch(direction)
-        {
+        switch (direction) {
             case FORWARD:
                 m_cameraPos += m_speed * m_cameraFront;
                 break;
@@ -44,13 +42,18 @@ namespace PE::Render {
         xoffset *= m_sensitivity;
         yoffset *= m_sensitivity;
 
-        m_yaw   += xoffset;
+        m_yaw += xoffset;
         m_pitch += yoffset;
 
-        if(m_pitch > 89.0f)
-            m_pitch =  89.0f;
-        if(m_pitch < -89.0f)
+        if (m_pitch > 89.0f)
+            m_pitch = 89.0f;
+        if (m_pitch < -89.0f)
             m_pitch = -89.0f;
+
+        if (m_yaw > 89.0f)
+            m_yaw = 89.0f;
+        if (m_yaw < -89.0f)
+            m_yaw = -89.0f;
 
         calculateFront();
         calculateView();
@@ -58,26 +61,22 @@ namespace PE::Render {
 
     void Camera::calculateFront() {
         glm::vec3 front;
-        front.x = (float) ( cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)) );
+        front.x = (float) (cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)));
         front.y = (float) sin(glm::radians(m_pitch));
-        front.z = (float) ( cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw)) );
+        front.z = (float) (cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw)));
 
         m_cameraFront = glm::normalize(front);
     }
 
     void Camera::zoom(float yoffset) {
 
-        if(m_fov >= 1.0f && m_fov <= 45.0f)
-        {
+        if (m_fov >= 1.0f && m_fov <= 45.0f) {
             m_fov -= yoffset;
         }
 
-        if(m_fov <= 1.0f)
-        {
+        if (m_fov <= 1.0f) {
             m_fov = 1.0f;
-        }
-        else if(m_fov >= 45.0f)
-        {
+        } else if (m_fov >= 45.0f) {
             m_fov = 45.0f;
         }
     }

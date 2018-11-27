@@ -15,13 +15,13 @@
 
 namespace PE::Render {
 
-    class Texture : public Resource::IResource {
+    class Texture : public Resource::IResource<Texture> {
     public:
-        explicit Texture() = default;
         Texture(uint32_t id, int32_t width, int32_t height, int32_t components) : m_id(id), m_width(width), m_height(height), m_components(components) {};
+        explicit Texture() = default;
         virtual ~Texture();
 
-        void load(const std::string & path) override;
+        void load(const std::string & path);
 
         inline void bindTexture() const {
             glBindTexture(GL_TEXTURE_2D, m_id);

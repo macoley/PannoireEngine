@@ -61,9 +61,11 @@ namespace PE::Render {
 
         for (const RenderObject &obj : objs) {
             matrix = glm::mat4();
-            //matrix = glm::rotate(matrix, 360.0f, obj.m_rotation);
             matrix = glm::translate(matrix, obj.m_position);
             matrix = glm::scale(matrix, obj.m_scale);
+            matrix = glm::rotate(matrix, glm::radians(obj.m_rotation[0]), glm::vec3(1.0f, .0f, .0f));
+            matrix = glm::rotate(matrix, glm::radians(obj.m_rotation[1]), glm::vec3(.0f, 1.0f, .0f));
+            matrix = glm::rotate(matrix, glm::radians(obj.m_rotation[2]), glm::vec3(.0f, .0f, 1.0f));
             shader.set("model", matrix);
 
             obj.m_material->bind(shader);

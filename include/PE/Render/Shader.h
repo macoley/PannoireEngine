@@ -26,15 +26,14 @@ namespace PE::Render {
     /**
      * Shader class
      */
-    class Shader : public Resource::IResource {
+    class Shader : public Resource::IResource<Shader> {
         using ManagerPtr = std::shared_ptr<Resource::ResourceManager>;
 
     public:
         explicit Shader(ManagerPtr manager) : m_manager(std::move(manager)) {};
-        Shader() = delete;
         virtual ~Shader();
 
-        void load(const std::string &path) override;
+        void load(const std::string &path);
 
         /*
          * SETTERS
@@ -78,14 +77,14 @@ namespace PE::Render {
     /**
      * Vertex Shader
      */
-    class VertexShader : public Resource::IResource {
+    class VertexShader : public Resource::IResource<VertexShader> {
         friend class Shader;
     public:
         VertexShader() = default;
 
         virtual ~VertexShader();
 
-        void load(const std::string &path) override;
+        void load(const std::string &path);
 
     private:
         void compile(const std::string &source);
@@ -96,14 +95,14 @@ namespace PE::Render {
     /**
      * Vertex Shader
      */
-    class FragmentShader : public Resource::IResource {
+    class FragmentShader : public Resource::IResource<FragmentShader> {
         friend class Shader;
 
     public:
         FragmentShader() = default;
         virtual ~FragmentShader();
 
-        void load(const std::string &path) override;
+        void load(const std::string &path);
 
     private:
         void compile(const std::string &source);

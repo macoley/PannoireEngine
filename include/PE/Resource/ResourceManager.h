@@ -9,92 +9,84 @@
 #include <unordered_map>
 #include <type_traits>
 #include <memory>
+#include <typeindex>
 
 #include "ResourcePool.h"
 #include "ResourceHandle.h"
+#include "ResourceCounter.h"
 
 #include "PE/Utils/Utils.h"
+#include "PE/Utils/Listener.h"
+#include "PE/Utils/ListenerBus.h"
 
 namespace PE::Resource {
-
-    class ResourceManager;
-
 
     /**
      * Resource manager
      */
-    class ResourceManager {
+    class ResourceManager : public Utils::ListenerBus<ResourceEvents> {
         using PoolPtr = std::shared_ptr<BaseResourcePool>;
 
     public:
-        ResourceManager() = default;
+        explicit ResourceManager() = default;
 
         virtual ~ResourceManager() = default;
 
         template<typename Resource, typename ... Args>
         ResourceHandle<Resource> create(Args &&... args);
 
-        template<typename Resource, typename ... Args>
-        ResourceHandle<Resource> load(const std::string &path, Args &&... args);
+        template<typename Resource>
+        ResourceHandle<Resource> load(const std::string &path);
 
         template<class Resource>
         Resource *get(ResourceIndex);
 
+        template<class Resource>
+        bool has(ResourceIndex) const;
+
         template<typename Resource>
         std::size_t getSize() const;
+
+        template<typename Resource, typename ... Args>
+        void registerResource(Args&& ... args);
+
     private:
-        /**
-         * Base Resource Counter
-         */
-        class BaseResourceCounter {
-        public:
-            using FamilyIndex = std::size_t;
+        template<typename Resource, typename ... Args>
+        void createPool(Args&& ... args);
 
-        protected:
-            static FamilyIndex m_family_counter;
-        };
+        //std::vector<PoolPtr> m_pools{};
 
-        /**
-         * Resource Counter
-         */
-        template<typename Resource>
-        class ResourceCounter : public BaseResourceCounter {
-        public:
-            static FamilyIndex getFamily();
-        };
+        template <typename Resource>
+        inline ResourcePool<Resource>* getPoolPtr() {
+            return static_cast<ResourcePool<Resource>*>(m_pools[std::type_index(typeid(Resource))].get());
+        }
 
-
-        template<typename Resource>
-        void createPool();
-
-        std::vector<PoolPtr> m_pools;
+        std::unordered_map<std::type_index, PoolPtr> m_pools{};
     };
 
-
-    /**
-     *
-     * @tparam Resource
-     * @return
-     */
-    template<typename Resource>
-    ResourceManager::BaseResourceCounter::FamilyIndex ResourceManager::ResourceCounter<Resource>::getFamily() {
-        static FamilyIndex family = m_family_counter++;
-        return family;
-    }
 
     /**
      * Create Resource Pool
      * @tparam Resource
      */
-    template<typename Resource>
-    void ResourceManager::createPool() {
-        auto index = ResourceCounter<Resource>::getFamily();
+    template<typename Resource, typename ... Args>
+    void ResourceManager::createPool(Args&& ... args) {
+        auto index = Resource::id();
 
+        std::cout << "Creating pool for: " << std::to_string(index) << " " << typeid(Resource).name() << std::endl;
+
+        /*
         if (index >= m_pools.size()) {
             m_pools.resize(index);
         }
+         */
 
-        m_pools.emplace(m_pools.begin() + index, new ResourcePool<Resource>());
+        using PoolType = ResourcePool<Resource>;
+        auto pool = new PoolType(std::forward<Args>(args)...);
+
+        m_pools.emplace(std::type_index(typeid(Resource)), pool);
+
+        addSubscriber(std::bind(&PoolType::onMsg, pool, std::placeholders::_1, std::placeholders::_2));
     }
 
     /**
@@ -106,14 +98,9 @@ namespace PE::Resource {
      */
     template<typename Resource, typename... Args>
     ResourceHandle<Resource> ResourceManager::create(Args &&... args) {
-        auto index = ResourceCounter<Resource>::getFamily();
+        //assert(Resource::id() < m_pools.size());
 
-        if (index >= m_pools.size()) {
-            createPool<Resource>();
-        }
-
-        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
-                ->createResource(std::forward<Args>(args) ...);
+        return getPoolPtr<Resource>()->createResource(std::forward<Args>(args)...);
     }
 
     /**
@@ -124,16 +111,12 @@ namespace PE::Resource {
      * @param args
      * @return
      */
-    template<typename Resource, typename... Args>
-    ResourceHandle<Resource> ResourceManager::load(const std::string &path, Args &&... args) {
-        auto index = ResourceCounter<Resource>::getFamily();
+    template<typename Resource>
+    ResourceHandle<Resource> ResourceManager::load(const std::string &path) {
 
-        if (index >= m_pools.size()) {
-            createPool<Resource>();
-        }
+        //assert(Resource::id() < m_pools.size());
 
-        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
-                ->loadResource(path, std::forward<Args>(args) ...);
+        return getPoolPtr<Resource>()->loadResource(path);
     }
 
     /**
@@ -143,10 +126,9 @@ namespace PE::Resource {
      */
     template<typename Resource>
     std::size_t ResourceManager::getSize() const {
-        auto index = ResourceCounter<Resource>::getFamily();
+        //assert(Resource::id() < m_pools.size());
 
-        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
-                ->getSize();
+        return getPoolPtr<Resource>()->getSize();
     }
 
     /**
@@ -157,10 +139,34 @@ namespace PE::Resource {
      */
     template<class Resource>
     Resource *ResourceManager::get(ResourceIndex resIndex) {
-        auto index = ResourceCounter<Resource>::getFamily();
+        //assert(Resource::id() < m_pools.size());
 
-        return static_cast<ResourcePool<Resource> *>(m_pools[index].get())
-                ->get(resIndex);
+        return getPoolPtr<Resource>()->get(resIndex);
+    }
+
+    /**
+     * Has resource?
+     * @tparam Resource
+     * @return
+     */
+    template<class Resource>
+    bool ResourceManager::has(ResourceIndex resIndex) const {
+        //assert(Resource::id() < m_pools.size());
+
+        return getPoolPtr<Resource>()->has(resIndex);
+    }
+
+    /**
+     *
+     * @tparam Resource
+     * @tparam Args
+     * @param args
+     */
+    template<typename Resource, typename... Args>
+    void ResourceManager::registerResource(Args &&... args) {
+        //assert(Resource::id() >= m_pools.size()); // the resource doesn't exist in manager
+
+        createPool<Resource, Args...>(std::forward<Args>(args)...);
     }
 
 }

@@ -12,7 +12,20 @@ namespace PE::Engine {
         Utils::Locator::provide(new Utils::ConsoleLogger());
         Utils::log("Core initializing");
 
+        // Resources
+        m_res_manager->registerResource<Resource::Properties>();
+        m_res_manager->registerResource<Render::Mesh>();
+        m_res_manager->registerResource<Render::Texture>();
+        m_res_manager->registerResource<Render::Material>();
+        m_res_manager->registerResource<Render::Model>(m_res_manager);
+        m_res_manager->registerResource<Render::Shader>(m_res_manager);
+        m_res_manager->registerResource<Render::VertexShader>();
+        m_res_manager->registerResource<Render::FragmentShader>();
+        m_res_manager->registerResource<Engine::Scene>(m_res_manager, m_ecs);
+
+
         // APP CONFIG
+
         auto config = m_res_manager->load<Resource::Properties>("config.yml");
 
         // RENDER CONTEXT
@@ -28,29 +41,45 @@ namespace PE::Engine {
                 config->get<uint32_t>("width"),
                 config->get<uint32_t>("height")
         );
-        m_camera->setPos(0.5f, 0.5f, 15.0f);
+
 
         m_context->setInputCallback([&](uint32_t key, uint32_t action) {
 
-            if(key == 68 /*d*/)
+            if (key == 68) // d
                 m_camera->move(Render::Camera_Movement::RIGHT);
 
-            if(key == 65 /*a*/)
+            if (key == 65) // a
                 m_camera->move(Render::Camera_Movement::LEFT);
 
-            if(key == 87 /*w*/)
+            if (key == 87) // w
                 m_camera->move(Render::Camera_Movement::FORWARD);
 
-            if(key == 83 /*s*/)
+            if (key == 83) // s
                 m_camera->move(Render::Camera_Movement::BACKWARD);
-
         });
 
-        m_shader = m_res_manager->load<Render::Shader>("shader.yml", m_res_manager);
-        m_scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"), m_res_manager, m_ecs);
+
+        m_shader = m_res_manager->load<Render::Shader>("shader.yml");
+        m_scene = m_res_manager->load<Engine::Scene>(config->get<std::string>("main_scene"));
+
 
         // RENDERER
         m_renderer = std::make_shared<Render::Renderer>(m_camera);
+
+        m_ecs->view<Component::Transform, Component::Camera>()
+                .each([&](const ECS::Entity entity, Component::Transform &t, Component::Camera &c) {
+                    m_camera->setPos(t.xPos, t.yPos, t.zPos);
+                    m_camera->rotate(t.xAngle, t.yAngle);
+                    m_camera->zoom(c.zoom);
+                });
+
+
+        auto monitor = std::make_unique<Resource::WindowsFileMonitor>();
+
+        monitor->watchDirectory("res", [&](const std::string &filename) {
+            Utils::log(filename + " has been changed!");
+            m_res_manager->addMsg<Resource::ResourceEvents::FILE_CHANGED>(Resource::FileInfo{filename});
+        });
 
         initLoop();
     }
@@ -62,6 +91,9 @@ namespace PE::Engine {
         m_context->processInput();
 
         m_renderer->reset();
+
+        m_res_manager->dispatch();
+
         m_ecs->view<Component::Transform, Component::Model>()
                 .each([&](const ECS::Entity entity, Component::Transform &t, Component::Model &r) {
 
@@ -75,6 +107,7 @@ namespace PE::Engine {
                     }
 
                 });
+
         m_renderer->sort();
     }
 

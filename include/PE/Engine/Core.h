@@ -15,10 +15,13 @@
 #include "PE/Render/Renderer.h"
 
 #include "PE/Resource/Properties.h"
+#include "PE/Resource/WindowsFileMonitor.h"
 
 #include "Scene.h"
 #include "LoggerDecorator.h"
 #include "Component.h"
+
+#include <cstring>
 
 namespace PE::Engine {
 

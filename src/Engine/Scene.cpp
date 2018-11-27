@@ -53,12 +53,22 @@ namespace PE::Engine {
 
             if(type == "Model")
             {
-                auto res = m_manager->load<Render::Model>(component["path"].as<std::string>(), m_manager);
+                auto res = m_manager->load<Render::Model>(component["path"].as<std::string>());
                 m_models.push_back(res);
 
                 m_ecs->assignComponent<Component::Model>(
                         entity,
                         static_cast<uint32_t>(res.getIndex())
+                );
+
+                continue;
+            }
+
+            if(type == "Camera")
+            {
+                m_ecs->assignComponent<Component::Camera>(
+                        entity,
+                        component["zoom"].as<float>()
                 );
 
                 continue;
