@@ -1,0 +1,10 @@
+#ifndef PE_ENGINE_SCRIPTINGMANAGER_H
+#define PE_ENGINE_SCRIPTINGMANAGER_H
+
+namespace PE::Engine {
+
+
+
+}
+
+#endif //PE_ENGINE_SCRIPTINGMANAGER_H

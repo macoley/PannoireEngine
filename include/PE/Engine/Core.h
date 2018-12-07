@@ -20,6 +20,11 @@
 #include "Scene.h"
 #include "LoggerDecorator.h"
 #include "Component.h"
+#include "Scripting.h"
+#include "Script.h"
+
+#include "duktape.h"
+#include "dukglue/dukglue.h"
 
 #include <cstring>
 
@@ -42,8 +47,12 @@ namespace PE::Engine {
         std::shared_ptr<Render::Camera> m_camera;
         std::shared_ptr<Render::Renderer> m_renderer;
 
+        //std::shared_ptr<Engine::Scripting<ECS::Manager>> m_scripting;
+        duk_context * ctx;
+
         Resource::ResourceHandle<Engine::Scene> m_scene;
         Resource::ResourceHandle<Render::Shader> m_shader;
+        Resource::ResourceHandle<Engine::Script> m_script;
     };
 
 }

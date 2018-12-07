@@ -47,3 +47,6 @@ CTestTestfile.cmake
 
 # CMake JetBrains
 cmake-build-*/
+
+# Visual studio code
+.vscode

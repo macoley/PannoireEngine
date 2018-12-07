@@ -21,6 +21,7 @@ namespace PE::Engine {
         m_res_manager->registerResource<Render::Shader>(m_res_manager);
         m_res_manager->registerResource<Render::VertexShader>();
         m_res_manager->registerResource<Render::FragmentShader>();
+        m_res_manager->registerResource<Engine::Script>();
         m_res_manager->registerResource<Engine::Scene>(m_res_manager, m_ecs);
 
 
@@ -81,6 +82,22 @@ namespace PE::Engine {
             m_res_manager->addMsg<Resource::ResourceEvents::FILE_CHANGED>(Resource::FileInfo{filename});
         });
 
+
+        // SCRIPTING
+        //m_script = m_res_manager->load<Engine::Script>("res/script.js");
+        m_script = m_res_manager->load<Engine::Script>("res/Rotate.js");
+
+        using API = Scripting<ECS::Manager>;
+        auto m_scripting = API::getInstance();
+        m_scripting->setECS(m_ecs);
+
+        ctx = duk_create_heap_default();
+
+
+        dukglue_register_constructor<API>(ctx, "API");
+        dukglue_register_function(ctx, API::getInstance, "getAPI");
+        dukglue_register_method(ctx, &API::rotateAll, "rotateAll");
+
         initLoop();
     }
 
@@ -93,6 +110,8 @@ namespace PE::Engine {
         m_renderer->reset();
 
         m_res_manager->dispatch();
+
+        m_script->updateFixed();
 
         m_ecs->view<Component::Transform, Component::Model>()
                 .each([&](const ECS::Entity entity, Component::Transform &t, Component::Model &r) {
@@ -165,6 +184,7 @@ namespace PE::Engine {
     }
 
     Core::~Core() {
+        duk_destroy_heap(ctx);
         Render::Texture::placeholdersDestroy();
 
         Utils::log("Engine turned off");
