@@ -84,19 +84,21 @@ namespace PE::Engine {
 
 
         // SCRIPTING
+        m_transpiler = TypescriptTranspiler::make();
+
         //m_script = m_res_manager->load<Engine::Script>("res/script.js");
-        m_script = m_res_manager->load<Engine::Script>("res/Rotate.js");
+        //m_script = m_res_manager->load<Engine::Script>("res/Rotate.js");
 
-        using API = Scripting<ECS::Manager>;
-        auto m_scripting = API::getInstance();
-        m_scripting->setECS(m_ecs);
+        //using API = Scripting<ECS::Manager>;
+        //auto m_scripting = API::getInstance();
+        //m_scripting->setECS(m_ecs);
 
-        ctx = duk_create_heap_default();
+        //ctx = duk_create_heap_default();
 
 
-        dukglue_register_constructor<API>(ctx, "API");
-        dukglue_register_function(ctx, API::getInstance, "getAPI");
-        dukglue_register_method(ctx, &API::rotateAll, "rotateAll");
+        //dukglue_register_constructor<API>(ctx, "API");
+        //dukglue_register_function(ctx, API::getInstance, "getAPI");
+        //dukglue_register_method(ctx, &API::rotateAll, "rotateAll");
 
         initLoop();
     }
@@ -111,7 +113,7 @@ namespace PE::Engine {
 
         m_res_manager->dispatch();
 
-        m_script->updateFixed();
+        //m_script->updateFixed();
 
         m_ecs->view<Component::Transform, Component::Model>()
                 .each([&](const ECS::Entity entity, Component::Transform &t, Component::Model &r) {

@@ -22,9 +22,7 @@
 #include "Component.h"
 #include "Scripting.h"
 #include "Script.h"
-
-#include "duktape.h"
-#include "dukglue/dukglue.h"
+#include "TypescriptTranspiler.h"
 
 #include <cstring>
 
@@ -46,6 +44,7 @@ namespace PE::Engine {
         std::shared_ptr<Render::Context> m_context;
         std::shared_ptr<Render::Camera> m_camera;
         std::shared_ptr<Render::Renderer> m_renderer;
+        std::shared_ptr<Engine::IScriptTranspiler> m_transpiler;
 
         //std::shared_ptr<Engine::Scripting<ECS::Manager>> m_scripting;
         duk_context * ctx;

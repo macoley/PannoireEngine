@@ -20,9 +20,13 @@ conan_cmake_run(CONANFILE conanfile.txt
         BASIC_SETUP CMAKE_TARGETS
         BUILD missing)
 
+# Javascript libs path
+add_definitions( -DJS_LIB_PATH="${PROJECT_SOURCE_DIR}/js" )
+
 # Project source
 add_subdirectory(lib)
 add_subdirectory(src)
+add_subdirectory(sandbox)
 
 
 option(PACKAGE_TESTS "Build the tests" ON)

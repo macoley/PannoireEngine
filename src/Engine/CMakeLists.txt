@@ -8,6 +8,9 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/${DIR})
 set(SRC
         ${INCROOT}/Core.h
         ${SRCROOT}/Core.cpp
+        ${INCROOT}/IScriptTranspiler.h
+        ${INCROOT}/TypescriptTranspiler.h
+        ${SRCROOT}/TypescriptTranspiler.cpp
         ${INCROOT}/Scene.h
         ${SRCROOT}/Scene.cpp
         ${INCROOT}/Script.h

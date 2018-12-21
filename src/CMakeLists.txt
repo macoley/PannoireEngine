@@ -1,7 +1,7 @@
 
 set(TARGET pe)
 
-add_executable(${TARGET} main.cpp ../include/PE/ECS/Entity.h)
+add_executable(${TARGET} main.cpp)
 
 add_subdirectory(Engine)
 add_subdirectory(ECS)
