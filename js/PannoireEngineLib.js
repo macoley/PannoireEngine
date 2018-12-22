@@ -6,7 +6,7 @@
  */
 
 this.LoadedModules = {};
-this.RootModule = new Module("", null);
+this.RootModule = new Module("");
  
 function Module(path) {
     this.path = path;
@@ -153,16 +153,16 @@ Module.prototype._load = function(request, parent) {
 
     var thatModule = this;
     var requireFnc = function(_request) {
-        return thatModule._load(_request, createdModule);
+        return thatModule._load(_request, createdModule).exports;
     }
 
     fnc(createdModule.exports, requireFnc, createdModule, this._resolveFileName(path), this._resolveDirectory(path));
  
-    return createdModule.exports;
+    return createdModule;
 }
 
 function loadModule(request) {
-    RootModule._load(request, RootModule);
+    return RootModule._load(request, RootModule).path;
 }
 
 function unloadModule(request) {
@@ -199,4 +199,50 @@ Module.prototype._unload = function() {
     }
 
     delete LoadedModules[this.path];
+}
+
+/**
+ * Instatiate modules
+ */
+
+this.Instances = {
+    _indexCounter: 0,
+    _freeIndexes: [],
+    data: []
+};
+
+function generateIndex() {
+    if(Instances._freeIndexes.length > 0)
+        return Instances._freeIndexes.pop();
+
+    return Instances._indexCounter++;
+}
+
+function applyAndNew(constructor, args) {
+    function partial () {
+       return constructor.apply(this, args);
+    };
+    if (typeof constructor.prototype === "object") {
+       partial.prototype = Object.create(constructor.prototype);
+    }
+    return partial;
+ }
+ 
+ /**
+  * Instatiate module property
+  * @param {String} path 
+  * @param {String} property 
+  * @param {Array} args 
+  */
+ 
+function instantiate(path, property, args) {
+    var cachedModule = LoadedModules[path];
+
+    if(cachedModule)
+    {
+        var index = generateIndex();
+
+        Instances.data[index] = applyAndNew(cachedModule.exports[property], args);
+        return index;
+    }
 }

@@ -17,12 +17,19 @@ void debug(duk_context * ctx) {
     duk_pop(ctx);
 }
 
-void loadModule(duk_context *ctx, const std::string& path)
+std::optional<std::string> loadModule(duk_context *ctx, const std::string& path)
 {
     duk_get_global_string(ctx, "loadModule");
     duk_push_string(ctx, path.c_str());
     duk_call(ctx, 1);
+
+    std::string result = duk_safe_to_string(ctx, -1);
     duk_pop(ctx);
+
+    if (result != "undefined")
+        return result;
+
+    return {};
 }
 
 void unloadModule(duk_context *ctx, const std::string& path)
@@ -31,6 +38,15 @@ void unloadModule(duk_context *ctx, const std::string& path)
     duk_push_string(ctx, path.c_str());
     duk_call(ctx, 1);
     duk_pop(ctx);
+}
+
+void instantiate(duk_context *ctx, const std::string& module, const std::string& property, const std::function<int(duk_context *)>& args = {})
+{
+    duk_get_global_string(ctx, "instantiate");
+    duk_push_string(ctx, module.c_str());
+    duk_push_string(ctx, property.c_str());
+
+    duk_call(ctx, 1);
 }
 
 void evalFile(duk_context *ctx, const std::string& path)
