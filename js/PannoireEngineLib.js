@@ -149,7 +149,7 @@ Module.prototype._load = function(request, parent) {
     var compiled = this._compile(this._transpile(source));    
     var fnc = eval(compiled);
 
-    //log(compiled);
+    log(compiled);
 
     var thatModule = this;
     var requireFnc = function(_request) {
