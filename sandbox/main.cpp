@@ -89,6 +89,12 @@ static duk_ret_t log(duk_context *ctx) {
     return 0;  /* no return value (= undefined) */
 }
 
+static duk_ret_t getComponent(duk_context *ctx) {
+    printf("GET COMPONENT CALLED! \n");
+
+    return 0;
+}
+
 int main()
 {
     auto ctx = duk_create_heap_default();
@@ -107,6 +113,9 @@ int main()
     duk_push_c_function(ctx, log, 1);
     duk_put_global_string(ctx, "log");
 
+    duk_push_c_function(ctx, getComponent, 1);
+    duk_put_global_string(ctx, "getComponent");
+
     // Typescript
     evalFile(ctx, js_lib("TypeScript.js"));
 
@@ -115,6 +124,15 @@ int main()
 
     // Load module
     loadModule(ctx, "./res/script.ts");
+    debug(ctx);
+
+    /*
+    if (duk_peval_string(ctx, "var elo = new this.LoadedModules['res/script.ts'].exports['Test']();") != 0) {
+        printf("eval failed: %s\n", duk_get_string(ctx, -1));
+    } else {
+        printf("result is: %s\n", duk_get_string(ctx, -1));
+    }
+    duk_pop(ctx);
     debug(ctx);
 
     /*
