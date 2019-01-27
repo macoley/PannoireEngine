@@ -18,7 +18,7 @@ struct TestComponent2 {
     int a;
 };
 
-TEST(testECS, initTest) {
+TEST(testECS, basicTest) {
     auto manager = ECS::MakeECS();
     auto entity1 = manager->createEntity();
     auto entity2 = manager->createEntity();
@@ -61,7 +61,7 @@ TEST(testECS, initTest) {
     //manager->getComponent<TestComponent>(entity2);
 }
 
-
+/*
 TEST(testECS, test2) {
     auto manager = ECS::MakeECS();
     auto entity1 = manager->createEntity();
@@ -81,10 +81,12 @@ TEST(testECS, test2) {
 
     manager->assignComponent<TestComponent>(entity4);
 }
+ */
 
 
 int main(int argc, char **argv) {
-    Utils::Locator::provide(new Utils::ConsoleLogger());
+    //Utils::Locator::provide(new Utils::ConsoleLogger());
+    Utils::Locator::provide(new Utils::NullLogger());
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

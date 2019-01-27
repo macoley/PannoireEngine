@@ -58,7 +58,12 @@ namespace PE::Resource {
 
         template <typename Resource>
         inline ResourcePool<Resource>* getPoolPtr() {
-            return static_cast<ResourcePool<Resource>*>(m_pools[std::type_index(typeid(Resource))].get());
+            return static_cast<ResourcePool<Resource>*>(m_pools.at(std::type_index(typeid(Resource))).get());
+        }
+
+        template <typename Resource>
+        inline const ResourcePool<Resource>* getPoolPtr() const {
+            return static_cast<const ResourcePool<Resource>*>(m_pools.at(std::type_index(typeid(Resource))).get());
         }
 
         std::unordered_map<std::type_index, PoolPtr> m_pools{};

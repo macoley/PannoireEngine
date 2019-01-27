@@ -5,7 +5,7 @@
 
 using namespace PE;
 
-struct TestRes : public Resource::IResource {
+struct TestRes : public Resource::IResource<TestRes> {
     TestRes() {
         Utils::log("Created new TestRes");
     }
@@ -14,7 +14,7 @@ struct TestRes : public Resource::IResource {
         Utils::log("Removed TestRes");
     }
 
-    void load(const std::string & path) override {
+    void load(const std::string & path) {
         Utils::log("Loaded: " + path);
     };
 
@@ -56,7 +56,7 @@ struct Dep {
     int a;
 };
 
-struct TestRes2 : public Resource::IResource {
+struct TestRes2 : public Resource::IResource<TestRes2> {
 
     TestRes2() {
         Utils::log("Createt with empty constructor !!!!");
@@ -75,7 +75,7 @@ struct TestRes2 : public Resource::IResource {
         Utils::log("Removed TestRes2");
     }
 
-    void load(const std::string & path) override {
+    void load(const std::string & path) {
         Utils::log("Loaded: " + path);
     };
 
@@ -101,7 +101,8 @@ TEST(testResource, initTest2) {
 
 
 int main(int argc, char **argv) {
-    Utils::Locator::provide(new Utils::ConsoleLogger());
+    //Utils::Locator::provide(new Utils::ConsoleLogger());
+    Utils::Locator::provide(new Utils::NullLogger());
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

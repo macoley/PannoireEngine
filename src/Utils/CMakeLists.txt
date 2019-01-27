@@ -13,6 +13,8 @@ set(SRC
         ${INCROOT}/ILogger.h
         ${INCROOT}/ConsoleLogger.h
         ${SRCROOT}/ConsoleLogger.cpp
+        ${INCROOT}/NullLogger.h
+        ${SRCROOT}/NullLogger.cpp
         ${INCROOT}/Utils.h
         ${SRCROOT}/Utils.cpp
         )

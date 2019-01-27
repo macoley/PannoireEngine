@@ -5,6 +5,7 @@
 #include <array>
 #include <list>
 #include <any>
+#include <mutex>
 
 namespace PE::Utils {
 
@@ -21,6 +22,7 @@ namespace PE::Utils {
         void dispatch();
 
     private:
+        std::mutex m_queue_mutex;
         Queue m_queue{};
     };
 
@@ -37,6 +39,7 @@ namespace PE::Utils {
     void Listener<T, Events>::addMsg(Data data) {
         //if(memcmp ( buffer1, buffer2, sizeof(buffer1) );)
 
+        std::lock_guard guard(m_queue_mutex);
         m_queue.emplace(Type, data);
     }
 
@@ -47,6 +50,8 @@ namespace PE::Utils {
      */
     template<typename T, typename Events>
     void Listener<T, Events>::dispatch() {
+
+        std::lock_guard guard(m_queue_mutex);
         while(!m_queue.empty())
         {
             const Message& msg = m_queue.front();

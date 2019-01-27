@@ -64,7 +64,7 @@ TEST(testMessages, listenerBus) {
 
     TestStruct2 testStruct;
     bus.addSubscriber(&TestStruct2::staticUpdate);
-    bus.addSubscriber<TestStruct2>(&TestStruct2::update, testStruct);
+    //bus.addSubscriber<TestStruct2>(&TestStruct2::update, testStruct);
 
     bus.addMsg<EventsEnum::FILE_CHANGED>(FileData{5});
     bus.dispatch();

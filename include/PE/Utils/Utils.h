@@ -3,6 +3,7 @@
 
 #include "Locator.h"
 #include "ConsoleLogger.h"
+#include "NullLogger.h"
 
 /**
  * Utils FACADE

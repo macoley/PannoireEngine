@@ -154,7 +154,7 @@ namespace PE::Engine {
          */
 
         double t = 0.0;
-        double dt = 0.01;
+        const double dt = 0.01;
 
         double currentTime = m_context->getTime();
         double accumulator = 0.0;
