@@ -23,6 +23,10 @@
 
 namespace PE::Render {
 
+    struct Color {
+        float r,g,b;
+    };
+
     class Context {
         using RenderFunction = std::function<void ()>;
         using ResizeFunction = std::function<void (uint32_t, uint32_t)>;
@@ -37,7 +41,7 @@ namespace PE::Render {
         bool isRunning();
         void processInput();
         void pollEvents();
-        void render(RenderFunction);
+        void render(RenderFunction, Color);
 
         void setResizeCallback(ResizeFunction fnc) {
             m_resizeCallback = std::move(fnc);

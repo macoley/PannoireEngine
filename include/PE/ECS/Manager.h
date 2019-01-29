@@ -38,6 +38,7 @@ namespace PE::ECS {
 
         inline void expand(size_t);
 
+
         /**
          * Components
          */
@@ -49,6 +50,9 @@ namespace PE::ECS {
 
         template<typename C>
         C& getComponent(Entity);
+
+        template<typename C>
+        C& getComponentUnsafe(uint32_t);
 
         /**
          * Views
@@ -159,6 +163,16 @@ namespace PE::ECS {
         m_entity_component_mask.resize(size);
         m_entity_version.resize(size);
     }
+
+    template<typename C>
+    C &Manager::getComponentUnsafe(uint32_t index) {
+        const auto family = Component<C>::getFamily();
+
+        return std::static_pointer_cast<ComponentSet<C>>(m_component_pools[family])
+                ->getUnsafe(index);
+    }
+
+
 
 }
 

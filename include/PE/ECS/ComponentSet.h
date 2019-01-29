@@ -88,6 +88,10 @@ namespace PE::ECS {
             return m_data[m_reverse[getIndex(entity)]];
         }
 
+        inline C &getUnsafe(uint32_t index) {
+            return m_data[m_reverse[index]];
+        }
+
         // Empty args override old (i hope so)
         template<typename... Args>
         void add(Entity, Args &&...);

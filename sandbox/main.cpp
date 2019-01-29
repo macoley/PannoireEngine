@@ -7,9 +7,36 @@
 
 #define js_lib(filename) (JS_LIB_PATH "/" filename)
 
+#define getter_setter(type, name)                                          \
+    type get_##name() { return m_component.name; }                         \
+    void set_##name(type t_##name) { m_component.name = t_##name; }
+
+#define comp_wrapper_begin(ComponentType)                                                \
+template <>                                                                              \
+struct ComponentBind<ComponentType> {                                                    \
+    explicit ComponentBind(ComponentType& t_component) : m_component(t_component) {};    \
+    ComponentBind(ComponentType &&) = delete;                                            \
+    ComponentBind() = delete;                                                            \
+    ComponentType& m_component;
+
+#define comp_wrapper_end()                                                               \
+};
+
+
+#define reg_component(ComponentType)                                                     \
+dukglue_register_constructor<ComponentBind<ComponentType>, ComponentType&>(ctx, #ComponentType);
+
+#define reg_component_val(ComponentType, Value)                                          \
+dukglue_register_property(ctx, &ComponentBind<ComponentType>::get_##Value, &ComponentBind<Component>::set_##Value, #Value);
+
+
 void debug(duk_context * ctx) {
     duk_eval_string(ctx, "JSON.stringify(this.LoadedModules);");
     printf("LoadedModules: %s\n", duk_safe_to_string(ctx, -1));
+    duk_pop(ctx);
+
+    duk_eval_string(ctx, "JSON.stringify(this.Instances);");
+    printf("Instances: %s\n", duk_safe_to_string(ctx, -1));
     duk_pop(ctx);
 
     duk_push_context_dump(ctx);
@@ -40,13 +67,16 @@ void unloadModule(duk_context *ctx, const std::string& path)
     duk_pop(ctx);
 }
 
-void instantiate(duk_context *ctx, const std::string& module, const std::string& property, const std::function<int(duk_context *)>& args = {})
+void instantiate(duk_context *ctx, const std::string& module, const std::string& className, const std::string& id, uint32_t entity)
 {
     duk_get_global_string(ctx, "instantiate");
     duk_push_string(ctx, module.c_str());
-    duk_push_string(ctx, property.c_str());
+    duk_push_string(ctx, className.c_str());
+    duk_push_string(ctx, id.c_str());
+    duk_push_int(ctx, entity);
 
-    duk_call(ctx, 1);
+    duk_call(ctx, 4);
+    duk_pop(ctx);
 }
 
 void evalFile(duk_context *ctx, const std::string& path)
@@ -61,6 +91,13 @@ void evalFile(duk_context *ctx, const std::string& path)
     }
 
     duk_pop(ctx);
+}
+
+void getInstanceMethod(duk_context *ctx, const std::string& id, const std::string& functionName) {
+    duk_get_global_string(ctx, "getModuleMethod");
+    duk_push_string(ctx, id.c_str());
+    duk_push_string(ctx, functionName.c_str());
+    duk_call(ctx, 2);
 }
 
 /*
@@ -89,11 +126,37 @@ static duk_ret_t log(duk_context *ctx) {
     return 0;  /* no return value (= undefined) */
 }
 
-static duk_ret_t getComponent(duk_context *ctx) {
-    printf("GET COMPONENT CALLED! \n");
+struct Component {
+    int value = 3;
+};
 
-    return 0;
+template <typename T>
+struct ComponentBind {
+    explicit ComponentBind(T& t_component) : m_component(t_component) {};
+    ComponentBind(T &&) = delete;
+    ComponentBind() = delete;
+    T& m_component;
+};
+
+comp_wrapper_begin(Component)
+    getter_setter(int, value);
+comp_wrapper_end()
+
+
+static duk_ret_t getComponent(duk_context *ctx) {
+    int entity = duk_to_number(ctx, 0);
+    int component = duk_to_number(ctx, 1);
+
+    printf("Entity: %i\n", entity);
+    printf("Component: %i\n", component);
+
+    auto comp = new Component();
+    auto wrapp = new ComponentBind<Component>(*comp);
+    dukglue_push(ctx, wrapp);
+
+    return 1;
 }
+
 
 int main()
 {
@@ -113,7 +176,7 @@ int main()
     duk_push_c_function(ctx, log, 1);
     duk_put_global_string(ctx, "log");
 
-    duk_push_c_function(ctx, getComponent, 1);
+    duk_push_c_function(ctx, getComponent, 2);
     duk_put_global_string(ctx, "getComponent");
 
     // Typescript
@@ -123,8 +186,52 @@ int main()
     evalFile(ctx, js_lib("PannoireEngineLib.js"));
 
     // Load module
-    loadModule(ctx, "./res/script.ts");
+    loadModule(ctx, "./res/Rotate.ts");
     debug(ctx);
+
+    // Instantiate
+    instantiate(ctx, "./res/Rotate.ts", "Rotate", "test", 1);
+    debug(ctx);
+
+    // register
+    //dukglue_register_constructor<ComponentBind<Component>, Component&>(ctx, "Test");
+    dukglue_register_property(ctx, &ComponentBind<Component>::get_value, &ComponentBind<Component>::set_value, "value");
+
+    reg_component(Component);
+    reg_component_val(Component, value);
+
+    // Get method
+    getInstanceMethod(ctx, "test", "update");
+
+
+    //auto comp = Component();
+    //auto test = new ComponentBind<Component>(comp);
+    //dukglue_push(ctx, test);
+    duk_call(ctx, 0);
+
+
+    //delete test;
+    //printf("Component value: %i\n", test->m_component.value);
+    //printf("Component value: %i\n", comp.value);
+
+    debug(ctx);
+
+
+
+
+    // duk_get_prototype(ctx, -3);
+
+
+    //duk_push_int(ctx, 123);
+    //duk_push_int(ctx, 2);
+    //duk_push_int(ctx, 3);
+
+    //debug(ctx);
+
+
+    //getInstanceMethod(ctx, "test", "update");
+
+    // Call update
 
     /*
     if (duk_peval_string(ctx, "var elo = new this.LoadedModules['res/script.ts'].exports['Test']();") != 0) {
@@ -135,7 +242,7 @@ int main()
     duk_pop(ctx);
     debug(ctx);
 
-    /*
+
     duk_push_c_function(ctx, require, 1);
     duk_put_global_string(ctx, "require");
 
@@ -143,7 +250,6 @@ int main()
     loadModule(ctx, resolveModule("script"));
     eval(ctx, "this.script.Test");
 
-     */
     //std::ifstream ifs2("res/script.ts");
     //std::ifstream ifs2("res/script.ts");
     //std::string content2((std::istreambuf_iterator<char>(ifs2)), (std::istreambuf_iterator<char>()));

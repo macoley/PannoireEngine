@@ -8,6 +8,9 @@ namespace PE::Engine {
     void Scene::load(const std::string &path) {
         auto properties = m_manager->load<Resource::Properties>(path);
         auto entitiesNode = properties->get<YAML::Node>("entities");
+        auto backgroundColorNode = properties->get<YAML::Node>("backgroundColor");
+
+        m_bg = {backgroundColorNode[0].as<float>(), backgroundColorNode[1].as<float>(), backgroundColorNode[2].as<float>()};
 
         for(const YAML::Node &n : entitiesNode) {
             makeEntity(n);
@@ -15,6 +18,9 @@ namespace PE::Engine {
     }
 
     Scene::~Scene() {
+        for(auto &[id, handle] : m_scripts)
+            handle->deleteInstance(id);
+
         for(auto &entity : m_entities)
             m_ecs->destroyEntity(entity);
 
@@ -69,6 +75,33 @@ namespace PE::Engine {
                 m_ecs->assignComponent<Component::Camera>(
                         entity,
                         component["zoom"].as<float>()
+                );
+
+                continue;
+            }
+
+            if(type == "Light")
+            {
+                m_ecs->assignComponent<Component::Light>(
+                        entity,
+                        component["color"][0].as<float>(),
+                        component["color"][1].as<float>(),
+                        component["color"][2].as<float>()
+                );
+
+                continue;
+            }
+
+            if(type == "Script")
+            {
+                auto res = m_manager->load<Scripting::Script>(component["path"].as<std::string>());
+                auto id = res->instantiate(ECS::getIndex(entity));
+
+                m_scripts.push_back({id, res});
+
+                m_ecs->assignComponent<Component::Script>(
+                        entity,
+                        static_cast<uint32_t>(res.getIndex())
                 );
 
                 continue;

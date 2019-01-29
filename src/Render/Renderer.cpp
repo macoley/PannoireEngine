@@ -11,6 +11,9 @@ namespace PE::Render {
         shader.set("projection", m_camera->getProjection());
         shader.set("view", m_camera->getView());
 
+        shader.set("lightPos", glm::vec3(m_light.z, m_light.y, m_light.z));
+        shader.set("lightColor", glm::vec3(m_light.r, m_light.g, m_light.b));
+
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
         render(shader, m_opaque);

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <iostream>
+#include <cstring>
 
 #include "PE/ECS/ECS.h"
 #include "PE/Resource/Resource.h"
@@ -20,11 +21,12 @@
 #include "Scene.h"
 #include "LoggerDecorator.h"
 #include "Component.h"
-#include "Scripting.h"
-#include "Script.h"
-#include "TypescriptTranspiler.h"
 
-#include <cstring>
+#include "PE/Render/Renderer.h"
+#include "PE/Scripting/Scripting.h"
+
+#include "API.h"
+
 
 namespace PE::Engine {
 
@@ -44,14 +46,13 @@ namespace PE::Engine {
         std::shared_ptr<Render::Context> m_context;
         std::shared_ptr<Render::Camera> m_camera;
         std::shared_ptr<Render::Renderer> m_renderer;
-        std::shared_ptr<Engine::IScriptTranspiler> m_transpiler;
+        std::shared_ptr<Scripting::ScriptEngine> m_scripting;
+        std::shared_ptr<Engine::API> m_api;
 
         //std::shared_ptr<Engine::Scripting<ECS::Manager>> m_scripting;
-        duk_context * ctx;
 
         Resource::ResourceHandle<Engine::Scene> m_scene;
         Resource::ResourceHandle<Render::Shader> m_shader;
-        Resource::ResourceHandle<Engine::Script> m_script;
     };
 
 }

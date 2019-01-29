@@ -16,6 +16,11 @@ namespace PE::Render {
     class Camera;
     class Model;
 
+    struct Light {
+        float x, y, z;
+        float r, g, b;
+    };
+
     /**
      * Renderer
      */
@@ -46,6 +51,10 @@ namespace PE::Render {
 
         void sort();
 
+        void setLight(Light light) {
+            m_light = light;
+        }
+
         void reset();
 
     private:
@@ -54,6 +63,8 @@ namespace PE::Render {
         ObjectContainer m_opaque;
         ObjectContainer m_transparent;
         CameraPtr m_camera;
+
+        Light m_light;
     };
 
     void Renderer::render(Shader &shader, const Renderer::ObjectContainer &objs) const {

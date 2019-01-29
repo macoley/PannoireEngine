@@ -144,7 +144,7 @@ Module.prototype._load = function(request, parent) {
     // Otherwise load module
     var createdModule = new Module(path);
     createdModule._addParent(parent);
-    LoadedModules[path] = createdModule;
+    
     var source = loadFileContent(path);
     var compiled = this._compile(this._transpile(source));    
     var fnc = eval(compiled);
@@ -158,11 +158,60 @@ Module.prototype._load = function(request, parent) {
 
     fnc(createdModule.exports, requireFnc, createdModule, this._resolveFileName(path), this._resolveDirectory(path));
  
-    return createdModule;
+    LoadedModules[path] = createdModule;
+
+    return createdModule.exports;
+}
+
+Module.prototype._reload = function(path) {
+    if(path == "") {
+        return RootModule;
+    }
+
+    // Check if a module already exists in the cache
+    var cachedModule = LoadedModules[path];
+
+    if(cachedModule)
+    {
+        var createdModule = new Module(path);
+        //createdModule.parents = Object.assign({}, cachedModule.parents);
+        createdModule.parents = cachedModule.parents;
+
+        var source = loadFileContent(path);
+        var compiled = this._compile(this._transpile(source));    
+        var fnc = eval(compiled);
+    
+        var thatModule = this;
+        var requireFnc = function(_request) {
+            return thatModule._load(_request, createdModule).exports;
+        }
+    
+        fnc(createdModule.exports, requireFnc, createdModule, this._resolveFileName(path), this._resolveDirectory(path));
+     
+        LoadedModules[path] = createdModule;
+
+        // Reload all parents
+        for (var i = 0; i < createdModule.parents.length; i++) {
+            this._reload(createdModule.parents[i].path);
+        }
+
+        log("Reloaded script " + path);
+    }
+
+    reloadInstances();
+
+    return LoadedModules[path];
 }
 
 function loadModule(request) {
-    return RootModule._load(request, RootModule).path;
+    var path = RootModule._resolvePath(request, RootModule);
+
+    if(LoadedModules[path])
+        RootModule._reload(path);
+    else
+        RootModule._load(request, RootModule);
+
+    return path;
 }
 
 function unloadModule(request) {
@@ -202,47 +251,43 @@ Module.prototype._unload = function() {
 }
 
 /**
- * Instatiate modules
+ * Instatiate Behaviour
  */
 
-this.Instances = {
-    _indexCounter: 0,
-    _freeIndexes: [],
-    data: []
-};
-
-function generateIndex() {
-    if(Instances._freeIndexes.length > 0)
-        return Instances._freeIndexes.pop();
-
-    return Instances._indexCounter++;
-}
-
-function applyAndNew(constructor, args) {
-    function partial () {
-       return constructor.apply(this, args);
-    };
-    if (typeof constructor.prototype === "object") {
-       partial.prototype = Object.create(constructor.prototype);
-    }
-    return partial;
- }
+this.Instances = {};
  
- /**
-  * Instatiate module property
-  * @param {String} path 
-  * @param {String} property 
-  * @param {Array} args 
-  */
- 
-function instantiate(path, property, args) {
+function instantiate(modulePath, className, id, entity) {
+    var path = RootModule._resolvePath(modulePath, RootModule);
     var cachedModule = LoadedModules[path];
 
     if(cachedModule)
     {
-        var index = generateIndex();
-
-        Instances.data[index] = applyAndNew(cachedModule.exports[property], args);
-        return index;
+        Instances[id] = {
+            modulePath: modulePath, 
+            className: className, 
+            id: id, 
+            entity: entity,
+            instance: new cachedModule.exports[className](entity)
+        };
     }
+}
+
+function reloadInstances()
+{
+    for (var obj in this.Instances) {
+        var ins = this.Instances[obj];
+
+        instantiate(ins.modulePath, ins.className, ins.id, ins.entity);
+    }
+}
+
+function deleteInstance(id) {
+    if(Instances[id])
+    {
+        delete Instances[id];
+    }
+}
+
+function getModuleMethod(id, func) {
+    return Object.getPrototypeOf(Instances[id].instance)[func].bind(Instances[id].instance);
 }

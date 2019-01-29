@@ -109,8 +109,8 @@ namespace PE::Render {
         glfwPollEvents();
     }
 
-    void Context::render(Context::RenderFunction fnc) {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    void Context::render(Context::RenderFunction fnc, Color color) {
+        glClearColor(color.r, color.g, color.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         fnc();

@@ -27,6 +27,14 @@ namespace PE::Engine::Component {
         float zoom = 45.0f;
     };
 
+    struct Light {
+        float colorR, colorG, colorB;
+    };
+
+    struct Script {
+        uint32_t resIndex;
+    };
+
 }
 
 #endif //PANNOIREENGINE_ENGINE_COMPONENT_H

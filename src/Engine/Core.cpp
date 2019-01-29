@@ -5,7 +5,8 @@ namespace PE::Engine {
 
     Core::Core()
             : m_ecs(ECS::MakeECS()),
-              m_res_manager(Resource::MakeManager()) {}
+              m_res_manager(Resource::MakeManager()),
+              m_scripting(Scripting::MakeScriptEngine()) {}
 
     void Core::init() {
         // UTILS
@@ -21,12 +22,11 @@ namespace PE::Engine {
         m_res_manager->registerResource<Render::Shader>(m_res_manager);
         m_res_manager->registerResource<Render::VertexShader>();
         m_res_manager->registerResource<Render::FragmentShader>();
-        m_res_manager->registerResource<Engine::Script>();
+        m_res_manager->registerResource<Scripting::Script>(m_scripting);
         m_res_manager->registerResource<Engine::Scene>(m_res_manager, m_ecs);
 
 
         // APP CONFIG
-
         auto config = m_res_manager->load<Resource::Properties>("config.yml");
 
         // RENDER CONTEXT
@@ -37,12 +37,15 @@ namespace PE::Engine {
         );
         Render::Texture::placeholdersInit();
 
+        // SCRIPTING
+        m_scripting->init();
+        m_api = std::make_shared<Engine::API>(m_scripting, m_ecs);
+
         // MAIN SCENE
         m_camera = std::make_shared<Render::Camera>(
                 config->get<uint32_t>("width"),
                 config->get<uint32_t>("height")
         );
-
 
         m_context->setInputCallback([&](uint32_t key, uint32_t action) {
 
@@ -75,6 +78,7 @@ namespace PE::Engine {
                 });
 
 
+        // Monitor
         auto monitor = std::make_unique<Resource::WindowsFileMonitor>();
 
         monitor->watchDirectory("res", [&](const std::string &filename) {
@@ -83,22 +87,6 @@ namespace PE::Engine {
         });
 
 
-        // SCRIPTING
-        m_transpiler = TypescriptTranspiler::make();
-
-        //m_script = m_res_manager->load<Engine::Script>("res/script.js");
-        //m_script = m_res_manager->load<Engine::Script>("res/Rotate.js");
-
-        //using API = Scripting<ECS::Manager>;
-        //auto m_scripting = API::getInstance();
-        //m_scripting->setECS(m_ecs);
-
-        //ctx = duk_create_heap_default();
-
-
-        //dukglue_register_constructor<API>(ctx, "API");
-        //dukglue_register_function(ctx, API::getInstance, "getAPI");
-        //dukglue_register_method(ctx, &API::rotateAll, "rotateAll");
 
         initLoop();
     }
@@ -113,7 +101,25 @@ namespace PE::Engine {
 
         m_res_manager->dispatch();
 
-        //m_script->updateFixed();
+        m_ecs->view<Component::Script>()
+                .each([&](const ECS::Entity entity, Component::Script &s) {
+                    auto script = m_res_manager->get<Scripting::Script>(s.resIndex)->getBehaviour(ECS::getIndex(entity));
+                    script.fixedUpdate();
+                });
+
+        m_ecs->view<Component::Transform, Component::Light>()
+                .each([&](const ECS::Entity entity, Component::Transform &t, Component::Light &l) {
+                    auto light = Render::Light();
+                    light.x = t.xPos;
+                    light.y = t.yPos;
+                    light.z = t.zPos;
+
+                    light.r = l.colorR;
+                    light.g = l.colorG;
+                    light.b = l.colorB;
+
+                    m_renderer->setLight(light);
+                });
 
         m_ecs->view<Component::Transform, Component::Model>()
                 .each([&](const ECS::Entity entity, Component::Transform &t, Component::Model &r) {
@@ -138,9 +144,17 @@ namespace PE::Engine {
     void Core::update(double alpha) {
         m_context->pollEvents();
 
+        m_ecs->view<Component::Script>()
+                .each([&](const ECS::Entity entity, Component::Script &s) {
+                    auto script = m_res_manager->get<Scripting::Script>(s.resIndex)->getBehaviour(ECS::getIndex(entity));
+                    script.update(alpha);
+                });
+
+        auto bg = m_scene->getBg();
+
         m_context->render([&]() {
             m_renderer->render(*m_shader, alpha);
-        });
+        }, {bg.r, bg.g, bg.b});
     }
 
     /**
@@ -186,7 +200,6 @@ namespace PE::Engine {
     }
 
     Core::~Core() {
-        duk_destroy_heap(ctx);
         Render::Texture::placeholdersDestroy();
 
         Utils::log("Engine turned off");
